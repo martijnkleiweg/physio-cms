@@ -20,12 +20,13 @@ module.exports = {
   all   : ()        => db.prepare('SELECT * FROM posts ORDER BY created_at DESC').all(),
   find  : slug      => db.prepare('SELECT * FROM posts WHERE slug = ?').get(slug),
   insert: p         => db.prepare(`
-      INSERT INTO posts (title, slug, content_md, excerpt, published)
-      VALUES (@title, @slug, @content_md, @excerpt, @published)
+      INSERT INTO posts (title, slug, content_md, excerpt, category, image_url, published)
+      VALUES (@title, @slug, @content_md, @excerpt, @category, @image_url, @published)
   `).run(p),
   update: p         => db.prepare(`
       UPDATE posts SET
         title=@title, content_md=@content_md, excerpt=@excerpt,
+        category=@category, image_url=@image_url,
         published=@published, updated_at=CURRENT_TIMESTAMP
       WHERE slug=@slug
   `).run(p),

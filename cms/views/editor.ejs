@@ -9,25 +9,50 @@
 
   <h1 class="mb-4"><%= post ? 'Edit' : 'Create' %> Post</h1>
 
+  <!-- =========================  EDITOR FORM  ========================= -->
   <form id="postForm" class="vstack gap-3">
-    <input  class="form-control" name="title"  placeholder="Title"
-            value="<%= post ? post.title : '' %>">
 
-    <input  class="form-control" name="slug"   placeholder="slug-my-post"
-            value="<%= post ? post.slug : '' %>">
+    <!-- title / slug -->
+    <input class="form-control" name="title" placeholder="Title"
+           value="<%= post ? post.title : '' %>">
 
+    <input class="form-control" name="slug"  placeholder="slug-my-post"
+           value="<%= post ? post.slug : '' %>">
+
+    <!-- category -->
+    <select class="form-select" name="category">
+      <% const cat = post ? post.category : 'news'; %>
+      <option value="news"    <%= cat==='news'    ? 'selected' : '' %>>News</option>
+      <option value="service" <%= cat==='service' ? 'selected' : '' %>>Service</option>
+      <option value="tips"    <%= cat==='tips'    ? 'selected' : '' %>>Tips</option>
+    </select>
+
+    <!-- markdown -->
     <textarea class="form-control" rows="12" name="content_md"
               placeholder="# Markdown here"><%= post ? post.content_md : '' %></textarea>
 
+    <!-- excerpt -->
     <textarea class="form-control" rows="3"  name="excerpt"
               placeholder="Short summary (optional)"><%= post ? post.excerpt : '' %></textarea>
 
+    <!-- image picker -->
+    <div>
+      <label class="form-label fw-semibold">Featured image</label>
+      <input type="file" id="imgInput" accept="image/*" class="form-control">
+      <input type="hidden" name="image_url" value="<%= post ? post.image_url : '' %>">
+      <img id="imgPreview"
+           src="<%= post && post.image_url ? post.image_url : '' %>"
+           style="max-width:220px;<%= post && post.image_url ? '' : 'display:none' %>;margin-top:.75rem;">
+    </div>
+
+    <!-- publish toggle -->
     <label class="form-check">
       <input class="form-check-input" type="checkbox" name="published" value="1"
              <%= post && post.published ? 'checked' : '' %>>
       <span class="form-check-label">Published</span>
     </label>
 
+    <!-- buttons -->
     <div>
       <button class="btn btn-primary">Save</button>
       <% if (post) { %>
@@ -36,48 +61,62 @@
     </div>
   </form>
 
+  <!-- =========================  LIST OF POSTS  ========================= -->
   <hr class="my-5">
-
   <h2 class="mb-3">All Posts</h2>
   <ul id="postList" class="list-group"></ul>
 
+  <!-- =========================  SCRIPTS  ========================= -->
   <script type="module">
-    // ---------- utilities ----------
-    const qs = sel => document.querySelector(sel);
+    const qs = s => document.querySelector(s);
 
-    // ---------- save handler ----------
+    /* ---------- Save ---------- */
     qs('#postForm').addEventListener('submit', async e => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(e.target));
       data.published = data.published ? 1 : 0;
+
       const res = await fetch('/admin/save', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(data)
+        method : 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body   : JSON.stringify(data)
       });
       if (res.ok) { alert('Saved ✔︎'); location.reload(); }
       else        { alert('Error saving'); }
     });
 
-    // ---------- delete handler ----------
+    /* ---------- Delete ---------- */
     <% if (post) { %>
-    qs('#deleteBtn').onclick = async () => {
+    qs('#deleteBtn')?.addEventListener('click', async () => {
       if (!confirm('Delete this post?')) return;
       await fetch('/admin/<%= post.slug %>', { method:'DELETE' });
       location.href = '/admin';
-    };
+    });
     <% } %>
 
-    // ---------- list of posts ----------
+    /* ---------- Image upload ---------- */
+    const imgInput   = qs('#imgInput');
+    const imgPreview = qs('#imgPreview');
+    imgInput?.addEventListener('change', async () => {
+      if (!imgInput.files.length) return;
+      const fd = new FormData();
+      fd.append('file', imgInput.files[0]);
+      const r = await fetch('/admin/upload', { method:'POST', body: fd });
+      if (!r.ok) { alert('Upload failed'); return; }
+      const { url } = await r.json();
+      qs('[name=image_url]').value = url;
+      imgPreview.src = url;
+      imgPreview.style.display = 'block';
+    });
+
+    /* ---------- List of posts ---------- */
     async function loadList() {
       const res  = await fetch('/api/posts');
       const data = await res.json();
       qs('#postList').innerHTML = data.map(p => `
         <li class="list-group-item d-flex justify-content-between align-items-center">
           <a href="/admin/${p.slug}">${p.title}</a>
-          <span class="badge bg-${p.published ? 'success' : 'secondary'}">
-            ${p.published ? 'live' : 'draft'}
-          </span>
+          <span class="badge bg-${p.published ? 'success' : 'secondary'}">${p.published ? 'live' : 'draft'}</span>
         </li>`).join('');
     }
     loadList();
