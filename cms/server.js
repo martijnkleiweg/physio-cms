@@ -20,6 +20,15 @@ app.get('/api/posts/:slug', (req, res)    => {
   res.json({ ...row, content_html: marked.parse(row.content_md) });
 });
 
+/* ---------- Admin login ---------- */
+const basicAuth = require('express-basic-auth');
+
+app.use('/admin', basicAuth({
+  users     : { 'editor': process.env.ADMIN_PW || 'ChangeMe123' },
+  challenge : true,            // browser shows login box
+  realm     : 'PhysioCMS'
+}));
+
 /* ---------- Admin UI ---------- */
 app.get('/admin',            (_, res)     => res.render('editor', { post: null }));
 app.get('/admin/:slug',     (req, res)    => {
