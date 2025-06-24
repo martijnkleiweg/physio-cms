@@ -6,181 +6,187 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Physio Therapy</title>
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles3.css">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
 
-    <!-- Quick‑win critical styles -->
-    <style>
-        /* Skip‑link helper */
-        .skip-link{
-            position:absolute;
-            top:-40px; left:0;
-            background:#000; color:#fff;
-            padding:.5rem 1rem; border-radius:.25rem;
-            z-index:1000;
-            transition:top .2s ease-in-out;
-        }
-        .skip-link:focus{top:0;}
-
-        /* Hero background moved from inline style */
-        .hero{
-            height:80vh;
-            background:url('images/hero.jpg') center center/cover no-repeat;
-        }
-    </style>
 </head>
 <body>
 
-    <!-- Skip to main content -->
-    <a href="#main" class="skip-link visually-hidden-focusable">Skip to main content</a>
-
     <!-- Top Bar with Contact Info -->
-    <div class="top-bar text-white py-2 bg-primary">
+    <div class="top-bar text-white py-2">
         <div class="container d-flex justify-content-between">
             <div class="contact-info">
-                <span><i class="bi bi-telephone"></i> 123&nbsp;456&nbsp;7890</span>
+                <span><i class="bi bi-telephone"></i> 123 456 7890</span>
                 <span class="mx-3"><i class="bi bi-envelope"></i> info@sitename.com</span>
             </div>
-            <div class="social-icons">
-                <a href="#" aria-label="Facebook"><i class="bi bi-facebook text-white mx-2"></i></a>
-                <a href="#" aria-label="Twitter"><i class="bi bi-twitter text-white mx-2"></i></a>
-                <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin text-white mx-2"></i></a>
-                <a href="#" aria-label="Instagram"><i class="bi bi-instagram text-white mx-2"></i></a>
+            <div class="social-icons d-none d-md-block">
+                <a href="#"><i class="bi bi-facebook text-white mx-2"></i></a>
+                <a href="#"><i class="bi bi-twitter text-white mx-2"></i></a>
+                <a href="#"><i class="bi bi-linkedin text-white mx-2"></i></a>
+                <a href="#"><i class="bi bi-instagram text-white mx-2"></i></a>
             </div>
         </div>
     </div>
 
     <!-- Header with Navbar -->
-    <header class="bg-white py-3 shadow-sm">
+    <header class="bg-white py-3 shadow-sm sticky-top">
         <div class="container">
             <nav class="navbar navbar-expand-lg navbar-light bg-white" aria-label="Primary navigation">
                 <!-- Logo -->
                 <a class="navbar-brand" href="#">
-                    <img src="images/logo.png" loading="lazy" alt="Physio Therapy Logo" class="img-fluid" style="max-height: 80px;">
+                    <img src="images/logo.png" alt="Physio Therapy Logo" class="img-fluid">
                 </a>
 
-                <!-- Book Appointment Button -->
-                <a href="#" class="btn btn-primary order-2 order-lg-3 mx-3">Book Appointment</a>
-
-                <!-- Toggler for mobile view -->
-                <button class="navbar-toggler order-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <!-- Hamburger toggler -->
+                <button class="navbar-toggler d-lg-none"
+                        type="button"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#mobileMenu"
+                        aria-controls="mobileMenu"
+                        aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Navbar Links -->
-                <div class="collapse navbar-collapse order-4 order-lg-2" id="navbarNav">
-                    <ul class="navbar-nav mx-auto">
-                        <li class="nav-item"><a class="nav-link text-dark" href="#home">Home</a></li>
-                        <li class="nav-item"><a class="nav-link text-dark" href="#about">About Us</a></li>
-                        <li class="nav-item"><a class="nav-link text-dark" href="#services">Services</a></li>
-                        <li class="nav-item"><a class="nav-link text-dark" href="#blog">Blog</a></li>
-                        <li class="nav-item"><a class="nav-link text-dark" href="#contact">Contact</a></li>
-                    </ul>
-                </div>
+                <!-- Desktop nav links (hidden on mobile) -->
+                <ul class="navbar-nav mx-auto d-none d-lg-flex gap-3">
+                    <li class="nav-item"><a class="nav-link text-dark" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="#about">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="#services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="#blog">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="#contact">Contact</a></li>
+                </ul>
+
+                <!-- Book Appointment Button (always visible) -->
+                <a href="#" class="btn btn-primary d-none d-lg-inline-block">Book Appointment</a>
             </nav>
         </div>
     </header>
 
-    <!-- Main content wrapper -->
-    <main id="main" role="main">
-        <!-- Hero Section -->
-        <section id="hero" class="hero text-white text-center d-flex justify-content-center align-items-center" aria-label="Hero image and tagline">
-            <div class="container">
-                <h1 class="display-4">We are a Unique Physical Therapy Clinic</h1>
-                <p class="lead">Volutpat sit amet leo id, efficitur mattis turpis. Donec bibendum.</p>
-                <a href="#" class="btn btn-primary btn-lg">Book Appointment</a>
-            </div>
-        </section>
+    <!-- OFF‑CANVAS MOBILE MENU -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="mobileMenuLabel">Menu</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column justify-content-between">
+            <ul class="navbar-nav gap-2">
+                <li class="nav-item"><a class="nav-link" href="#home" data-bs-dismiss="offcanvas">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#about" data-bs-dismiss="offcanvas">About Us</a></li>
+                <li class="nav-item"><a class="nav-link" href="#services" data-bs-dismiss="offcanvas">Services</a></li>
+                <li class="nav-item"><a class="nav-link" href="#blog" data-bs-dismiss="offcanvas">Blog</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact" data-bs-dismiss="offcanvas">Contact</a></li>
+            </ul>
+            <a href="#" class="btn btn-primary mt-4" data-bs-dismiss="offcanvas">Book Appointment</a>
+        </div>
+    </div>
 
-        <!-- Services Section -->
-        <section id="services" class="py-5" aria-labelledby="services-heading">
-            <div class="container text-center">
-                <h2 id="services-heading" class="mb-4">Our Services</h2>
-                <div class="row g-4">
-                    <!-- Service 1 -->
-                    <article class="col-md-4" aria-labelledby="service-one-title">
-                        <div class="card shadow h-100">
-                            <img src="images/service_placeholder.jpg" loading="lazy" class="card-img-top" alt="Service One illustration">
-                            <div class="card-body">
-                                <h5 id="service-one-title" class="card-title">Service One</h5>
-                                <p class="card-text">Description of the service goes here.</p>
-                            </div>
+    <!-- Hero Section -->
+    <section id="hero" class="text-white text-center d-flex justify-content-center align-items-center">
+        <div class="overlay"></div>
+        <div class="container">
+            <h1 class="display-4">We are a Unique Physical Therapy Clinic</h1>
+            <p class="lead">Providing personalized care to help you achieve optimal health and wellness.</p>
+            <a href="#" class="btn btn-primary btn-lg">Book Appointment</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-5">
+        <div class="container text-center">
+            <h2 class="mb-4">Our Services</h2>
+            <div class="row">
+                <!-- Service 1 -->
+                <div class="col-md-4">
+                    <div class="card shadow">
+                        <img src="images/service1.jpg" class="card-img-top" alt="Physical Therapy">
+                        <div class="card-body">
+                            <h5 class="card-title">Physical Therapy</h5>
+                            <p class="card-text">Expert care to restore mobility and reduce pain.</p>
                         </div>
-                    </article>
-                    <!-- Service 2 -->
-                    <article class="col-md-4" aria-labelledby="service-two-title">
-                        <div class="card shadow h-100">
-                            <img src="images/service_placeholder.jpg" loading="lazy" class="card-img-top" alt="Service Two illustration">
-                            <div class="card-body">
-                                <h5 id="service-two-title" class="card-title">Service Two</h5>
-                                <p class="card-text">Description of the service goes here.</p>
-                            </div>
+                    </div>
+                </div>
+                <!-- Service 2 -->
+                <div class="col-md-4">
+                    <div class="card shadow">
+                        <img src="images/service2.jpg" class="card-img-top" alt="Sports Rehabilitation">
+                        <div class="card-body">
+                            <h5 class="card-title">Sports Rehabilitation</h5>
+                            <p class="card-text">Comprehensive programs to get you back in the game.</p>
                         </div>
-                    </article>
-                    <!-- Service 3 -->
-                    <article class="col-md-4" aria-labelledby="service-three-title">
-                        <div class="card shadow h-100">
-                            <img src="images/service_placeholder.jpg" loading="lazy" class="card-img-top" alt="Service Three illustration">
-                            <div class="card-body">
-                                <h5 id="service-three-title" class="card-title">Service Three</h5>
-                                <p class="card-text">Description of the service goes here.</p>
-                            </div>
+                    </div>
+                </div>
+                <!-- Service 3 -->
+                <div class="col-md-4">
+                    <div class="card shadow">
+                        <img src="images/service3.jpg" class="card-img-top" alt="Wellness Programs">
+                        <div class="card-body">
+                            <h5 class="card-title">Wellness Programs</h5>
+                            <p class="card-text">Holistic approaches to maintain a healthy lifestyle.</p>
                         </div>
-                    </article>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Blog Section -->
-        <section id="blog" class="bg-light py-5" aria-labelledby="blog-heading">
-            <div class="container text-center">
-                <h2 id="blog-heading" class="mb-4">Latest News</h2>
-                <div class="row g-4">
-                    <!-- Blog Post Preview 1 -->
-                    <article class="col-md-4" aria-labelledby="post-one-title">
-                        <div class="card shadow h-100">
-                            <img src="images/blog_placeholder.jpg" loading="lazy" class="card-img-top" alt="Featured image for Blog Post One">
-                            <div class="card-body">
-                                <h5 id="post-one-title" class="card-title">Blog Post One</h5>
-                                <p class="card-text">Preview of the blog post content goes here.</p>
-                            </div>
+    <!-- Blog Section -->
+    <section id="blog" class="bg-light py-5">
+        <div class="container text-center">
+            <h2 class="mb-4">Latest News</h2>
+            <div class="row">
+                <!-- Blog Post Preview 1 -->
+                <div class="col-md-4">
+                    <div class="card shadow">
+                        <img src="images/blog1.jpg" class="card-img-top" alt="Understanding Physical Therapy">
+                        <div class="card-body">
+                            <h5 class="card-title">Understanding Physical Therapy</h5>
+                            <p class="card-text">Discover how physical therapy can improve your life.</p>
+                            <a href="#" class="btn btn-outline-primary">Read More</a>
                         </div>
-                    </article>
-                    <!-- Blog Post Preview 2 -->
-                    <article class="col-md-4" aria-labelledby="post-two-title">
-                        <div class="card shadow h-100">
-                            <img src="images/blog_placeholder.jpg" loading="lazy" class="card-img-top" alt="Featured image for Blog Post Two">
-                            <div class="card-body">
-                                <h5 id="post-two-title" class="card-title">Blog Post Two</h5>
-                                <p class="card-text">Preview of the blog post content goes here.</p>
-                            </div>
+                    </div>
+                </div>
+                <!-- Blog Post Preview 2 -->
+                <div class="col-md-4">
+                    <div class="card shadow">
+                        <img src="images/blog2.jpg" class="card-img-top" alt="Tips for a Healthy Lifestyle">
+                        <div class="card-body">
+                            <h5 class="card-title">Tips for a Healthy Lifestyle</h5>
+                            <p class="card-text">Simple steps to enhance your well-being every day.</p>
+                            <a href="#" class="btn btn-outline-primary">Read More</a>
                         </div>
-                    </article>
-                    <!-- Blog Post Preview 3 -->
-                    <article class="col-md-4" aria-labelledby="post-three-title">
-                        <div class="card shadow h-100">
-                            <img src="images/blog_placeholder.jpg" loading="lazy" class="card-img-top" alt="Featured image for Blog Post Three">
-                            <div class="card-body">
-                                <h5 id="post-three-title" class="card-title">Blog Post Three</h5>
-                                <p class="card-text">Preview of the blog post content goes here.</p>
-                            </div>
+                    </div>
+                </div>
+                <!-- Blog Post Preview 3 -->
+                <div class="col-md-4">
+                    <div class="card shadow">
+                        <img src="images/blog3.jpg" class="card-img-top" alt="Injury Prevention Strategies">
+                        <div class="card-body">
+                            <h5 class="card-title">Injury Prevention Strategies</h5>
+                            <p class="card-text">Learn how to stay active while minimizing risks.</p>
+                            <a href="#" class="btn btn-outline-primary">Read More</a>
                         </div>
-                    </article>
+                    </div>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top"><i class="bi bi-arrow-up-circle-fill"></i></a>
 
     <!-- Footer -->
     <footer class="bg-dark text-white py-3 text-center">
-        <p class="mb-0">© 2024 Physio Therapy. All rights reserved.</p>
+        <p>© 2024 Physio Therapy. All rights reserved.</p>
     </footer>
 
-    <!-- Bootstrap JS Bundle (deferred) -->
-    <script src="bootstrap/js/bootstrap.bundle.min.js" defer></script>
+    <!-- Bootstrap JS Bundle (includes offcanvas) -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
