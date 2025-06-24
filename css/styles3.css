@@ -1,0 +1,359 @@
+/* ================================================================
+   styles3.css  –  full file (with regular Bootstrap hamburger icon)
+   ================================================================= */
+
+/* ---------- Reset and root utilities ---------- */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #0066cc;
+    --secondary-color: #003366;
+    --accent-color:   #0099ff;
+    --light-color:    #f4f4f4;
+    --dark-color:     #333;
+    --white-color:    #fff;
+    --font-family: 'Open Sans', Arial, sans-serif;
+}
+
+/* ---------- Base layout ---------- */
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    min-width: 320px;
+}
+
+.container { min-width: 320px; }
+
+/* ---------- Top bar ---------- */
+
+.top-bar { background-color: var(--primary-color); }
+
+.top-bar .contact-info span { font-size: 14px; color: var(--white-color); }
+.top-bar .social-icons  i   { font-size: 16px; }
+.top-bar .social-icons a:hover { color: var(--accent-color); }
+
+/* ---------- Header / navbar ---------- */
+
+header {
+    background-color: var(--white-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar {
+    padding: 0;
+    display: flex;
+    align-items: center;
+    min-height: 60px;
+    height: auto;                         /* allow natural growth */
+}
+
+/* Logo */
+.navbar-brand {
+    padding: 0;
+    margin-right: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand img {
+    max-height: 60px;
+    display: block;
+    transition: max-height .3s ease;
+}
+
+@media (min-width: 768px)  { .navbar-brand img { max-height: 80px;  } }
+@media (min-width: 992px)  { .navbar-brand img { max-height: 100px; } }
+@media (min-width: 1200px) { .navbar-brand img { max-height: 120px; } }
+
+/* Nav links */
+.navbar-nav {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.navbar-nav .nav-link,
+.navbar .btn-primary { align-self: center; }
+
+.navbar-nav .nav-link {
+    color: var(--dark-color) !important;
+    font-weight: 600;
+    padding: 10px 15px;
+    position: relative;
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: var(--primary-color);
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    transition: width .3s;
+}
+
+.navbar-nav .nav-link:hover::after { width: 100%; }
+.navbar-nav .nav-link:hover { color: var(--primary-color) !important; }
+
+/* Book Appointment button inside header */
+.btn-primary.order-2 { margin-top: 0; }
+
+/* ---------- Mobile tweaks ---------- */
+@media (max-width:992px){
+    .navbar .btn-primary { margin: 0 auto; }
+    .navbar-toggler     { flex: 0 0 auto; }
+    .navbar-collapse    { order: 4; }
+    .navbar-nav         { flex-direction: column; align-items:center; }
+    .navbar-nav .nav-link { width:auto; text-align:center; }
+    .navbar .btn-primary { margin-top: 10px; }
+}
+
+/* ---------- Hero ---------- */
+
+#hero{
+    background: url('hero.jpg') no-repeat center center/cover;
+    height: 80vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white-color);
+    text-align: center;
+}
+
+#hero .overlay{
+    position:absolute; inset:0;
+    background: rgba(0,51,102,.6);
+    z-index:1;
+}
+#hero .container{ position:relative; z-index:2; }
+
+#hero h1{ font-size:3rem; }
+#hero p { font-size:1.2rem; }
+
+#hero .btn-lg{
+    margin-top:20px;
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+#hero .btn-lg:hover{
+    background-color: var(--white-color);
+    color: var(--primary-color);
+}
+
+/* ---------- Services ---------- */
+
+#services{ padding:60px 0; }
+#services h2{
+    font-size:2.5rem;
+    margin-bottom:40px;
+    color:var(--primary-color);
+}
+#services .card{
+    margin-bottom:30px;
+    transition:transform .3s;
+}
+#services .card:hover{ transform:translateY(-10px); }
+#services .card-title{ font-size:1.5rem; font-weight:600; }
+#services .card-text { font-size:1rem; color:var(--dark-color); }
+
+/* ---------- Blog ---------- */
+
+#blog{
+    padding:60px 0;
+    background-color:var(--light-color);
+}
+#blog h2{
+    font-size:2.5rem;
+    margin-bottom:40px;
+    color:var(--primary-color);
+}
+#blog .card{
+    margin-bottom:30px;
+    transition:transform .3s;
+}
+#blog .card:hover{ transform:translateY(-10px); }
+#blog .card-title{ font-size:1.5rem; font-weight:600; }
+#blog .card-text { font-size:1rem; color:var(--dark-color); }
+
+#blog .btn-outline-primary{
+    border-color:var(--primary-color);
+    color:var(--primary-color);
+}
+#blog .btn-outline-primary:hover{
+    background-color:var(--primary-color);
+    color:var(--white-color);
+}
+
+/* ---------- Back-to-top ---------- */
+
+.back-to-top{
+    position:fixed;
+    bottom:30px; right:30px;
+    background:var(--primary-color);
+    color:var(--white-color);
+    padding:10px;
+    border-radius:50%;
+    display:none;
+    z-index:99;
+}
+.back-to-top:hover{
+    background:var(--accent-color); color:var(--white-color);
+}
+body.scrolled .back-to-top{ display:block; }
+
+/* ---------- Footer ---------- */
+
+footer{
+    padding:20px;
+    text-align:center;
+    background-color:var(--dark-color);
+    color:var(--white-color);
+    font-size:.9rem;
+}
+
+/* Social icon hover (top-bar & footer) */
+.social-icons a:hover{ color:var(--accent-color); }
+
+/* Primary buttons */
+.btn-primary{
+    background-color:var(--primary-color);
+    border-color:var(--primary-color);
+}
+.btn-primary:hover{
+    background-color:var(--accent-color);
+    border-color:var(--accent-color);
+}
+
+/* ---------- Responsive typography ---------- */
+@media (max-width:768px){
+    #hero h1{ font-size:2.5rem; }
+    #hero p { font-size:1rem;  }
+}
+@media (max-width:576px){
+    #hero h1{ font-size:2rem; }
+    #hero p { font-size:.9rem; }
+}
+
+/* ================================================================
+   OFF-CANVAS MENU & HEADER ENHANCEMENTS
+   ================================================================ */
+
+/* Drawer look-and-feel */
+.offcanvas-start{
+    width:270px;
+    border-top-right-radius:.75rem;
+    border-bottom-right-radius:.75rem;
+    box-shadow:4px 0 24px rgba(0,0,0,.08);
+}
+.offcanvas.offcanvas-start{
+    transition:transform .35s cubic-bezier(.4,0,.2,1);
+}
+.offcanvas-header{
+    background:linear-gradient(135deg,var(--primary-color),var(--accent-color));
+    color:#fff;
+    padding:.9rem 1.25rem;
+    border-top-right-radius:.75rem;
+}
+
+/* Drawer links */
+.offcanvas .nav-link{
+    font-weight:600;
+    padding:.75rem 1rem;
+    border-radius:.4rem;
+    transition:background .2s;
+}
+.offcanvas .nav-link:hover,
+.offcanvas .nav-link:focus{
+    background:rgba(0,102,204,.08);
+}
+.offcanvas .nav-link.active{
+    background:var(--primary-color);
+    color:#fff;
+}
+/* Drawer CTA */
+.offcanvas a.btn-primary{
+    background:var(--primary-color);
+    font-weight:600;
+    letter-spacing:.3px;
+}
+
+/* Backdrop tweak */
+.offcanvas-backdrop.show{
+    opacity:.35;
+    backdrop-filter:blur(1px);
+}
+
+/* ---------- Sticky header glass effect ---------- */
+header.sticky-top{
+    backdrop-filter:saturate(180%) blur(8px);
+    background:rgba(255,255,255,.9);
+    box-shadow:0 2px 6px rgba(0,0,0,.06);
+}
+
+/* ---------- Desktop link underline ---------- */
+@media (min-width:992px){
+    .navbar-nav .nav-link{ position:relative; }
+    .navbar-nav .nav-link::after{
+        content:'';
+        position:absolute;
+        left:0; bottom:-6px;
+        width:0; height:2px;
+        background:var(--primary-color);
+        transition:width .25s;
+    }
+    .navbar-nav .nav-link:hover::after,
+    .navbar-nav .nav-link.active::after{ width:100%; }
+}
+
+/* ================================================================
+   HAMBURGER BUTTON – retain standard Bootstrap icon
+   ================================================================ */
+
+/* Minimal styling */
+.navbar-toggler{
+    border:none;
+    padding:.25rem .5rem;
+}
+.navbar-toggler:focus{ box-shadow:none; }
+
+/* Ensure dark bars (overrides Bootstrap default) */
+.navbar-toggler-icon{
+    width:1.5em; height:1.5em;
+    background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(51,51,51,0.9)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Tiny margin on very small screens */
+@media (max-width:576px){
+    .navbar-toggler{ margin-right:.25rem; }
+}
+
+/* ---------- Logo sizing (tweak) ---------- */
+
+/* default (mobile) still 60 px */
+.navbar-brand img { max-height: 60px; }
+
+/* tablets ≥ 768 px */
+@media (min-width: 768px){
+    .navbar-brand img { max-height: 60px; }   /* was 80 */
+}
+
+/* laptops ≥ 992 px */
+@media (min-width: 992px){
+    .navbar-brand img { max-height: 80px; }   /* was 100 */
+}
+
+/* large desktops ≥ 1200 px */
+@media (min-width: 1200px){
+    .navbar-brand img { max-height: 100px; }   /* was 120 */
+}
