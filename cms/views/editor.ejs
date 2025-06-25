@@ -39,10 +39,10 @@
     <div>
       <label class="form-label fw-semibold">Featured image</label>
       <input type="file" id="imgInput" accept="image/*" class="form-control">
-      <input type="hidden" name="image_url" value="<%= post ? post.image_url : '' %>">
+      <input type="hidden" name="img_base" value="<%= post ? post.img_base : '' %>">
       <img id="imgPreview"
-           src="<%= post && post.image_url ? post.image_url : '' %>"
-           style="max-width:220px;<%= post && post.image_url ? '' : 'display:none' %>;margin-top:.75rem;">
+           src="<%= post && post.img_base ? '/uploads/' + post.img_base + '-card.jpg' : '' %>"
+           style="max-width:220px;<%= post && post.img_base ? '' : 'display:none' %>;margin-top:.75rem;">
     </div>
 
     <!-- publish toggle -->
@@ -103,9 +103,9 @@
       fd.append('file', imgInput.files[0]);
       const r = await fetch('/admin/upload', { method:'POST', body: fd });
       if (!r.ok) { alert('Upload failed'); return; }
-      const { url } = await r.json();
-      qs('[name=image_url]').value = url;
-      imgPreview.src = url;
+      const { basename } = await r.json();              // { basename: "1719498726" }
+      qs('[name=img_base]').value = basename;
+      imgPreview.src = `/uploads/${basename}-card.jpg`;
       imgPreview.style.display = 'block';
     });
 
