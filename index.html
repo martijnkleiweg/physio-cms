@@ -109,55 +109,57 @@
   <!-- ===== JS ========================================================= -->
   <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
-  <script type="module">
-    /* ------------ fetch posts from CMS ------------ */
-    async function getPosts() {
-      try {
-        const r = await fetch('/api/posts');
-        if (!r.ok) throw new Error('API error');
-        return (await r.json()).filter(p => p.published);
-      } catch (err) {
-        console.error(err);
-        return [];
-      }
+  <!-- ============  Dynamic content loader  ============ -->
+<script type="module">
+  async function getPosts () {
+    try {
+      const r = await fetch('/api/posts');
+      if (!r.ok) throw new Error('API error');
+      return (await r.json()).filter(p => p.published);
+    } catch (err) {
+      console.error(err);
+      return [];
     }
+  }
 
-    /* ------------ card factory ------------ */
-    function card(p) {
-      return `
-        <div class="col-md-4">
-          <div class="card shadow h-100">
-            ${p.image_url ? `<img src="${p.image_url}" class="card-img-top" alt="${p.title}">` : ''}
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">${p.title}</h5>
-              <p class="card-text flex-grow-1">${p.excerpt ?? ''}</p>
-              <a href="post.html?slug=${encodeURIComponent(p.slug)}"
-                 class="btn btn-outline-primary mt-auto">Read More</a>
-            </div>
+  /* ------------ card factory (uses img_base-card.jpg) ------------ */
+  function card (p) {
+    const cardImg = p.img_base ? `/uploads/${p.img_base}-card.jpg` : '';
+    return `
+      <div class="col-md-4">
+        <div class="card shadow h-100">
+          ${cardImg ? `<img src="${cardImg}" class="card-img-top" alt="${p.title}">` : ''}
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">${p.title}</h5>
+            <p class="card-text flex-grow-1">${p.excerpt ?? ''}</p>
+            <a href="post.html?slug=${encodeURIComponent(p.slug)}"
+               class="btn btn-outline-primary mt-auto">Read More</a>
           </div>
-        </div>`;
-    }
+        </div>
+      </div>`;
+  }
 
-    /* ------------ render both sections ------------ */
-    (async () => {
-      const posts = await getPosts();
+  /* ------------ render Services + Latest News ------------ */
+  (async () => {
+    const posts = await getPosts();
 
-      /* Services */
-      const servicesHtml = posts
-        .filter(p => p.category === 'service')
-        .map(card).join('');
-      document.getElementById('servicesRow').innerHTML =
-        servicesHtml || '<p class="text-muted">Services coming soon.</p>';
+    /* Services */
+    const servicesHtml = posts
+      .filter(p => p.category === 'service')
+      .map(card).join('');
+    document.getElementById('servicesRow').innerHTML =
+      servicesHtml || '<p class="text-muted">Services coming soon.</p>';
 
-      /* Latest news – newest 3 */
-      const newsHtml = posts
-        .filter(p => p.category === 'news')
-        .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
-        .slice(0, 3)
-        .map(card).join('');
-      document.getElementById('newsRow').innerHTML =
-        newsHtml || '<p class="text-muted">No news yet.</p>';
-    })();
-  </script>
+    /* Latest news – newest 3 */
+    const newsHtml = posts
+      .filter(p => p.category === 'news')
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 3)
+      .map(card).join('');
+    document.getElementById('newsRow').innerHTML =
+      newsHtml || '<p class="text-muted">No news yet.</p>';
+  })();
+</script>
+
 </body>
 </html>
