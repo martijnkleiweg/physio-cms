@@ -1,36 +1,131 @@
-<!DOCTYPE html><html><head>
-  <meta charset="utf-8"><title>Post</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Meta -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Article – Physio Therapy</title>
+
+  <!-- Fonts & CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/styles3.css">
-</head><body>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+</head>
+<body>
 
-  <!-- hero banner -->
-  <header id="hero" class="hero-banner">
+  <!-- ===== TOP BAR ==================================================== -->
+  <div class="top-bar text-white py-2">
+    <div class="container d-flex justify-content-between">
+      <div class="contact-info">
+        <span><i class="bi bi-telephone"></i> 123 456 7890</span>
+        <span class="mx-3"><i class="bi bi-envelope"></i> info@sitename.com</span>
+      </div>
+      <div class="social-icons d-none d-md-block">
+        <a href="#"><i class="bi bi-facebook text-white mx-2"></i></a>
+        <a href="#"><i class="bi bi-twitter text-white mx-2"></i></a>
+        <a href="#"><i class="bi bi-linkedin text-white mx-2"></i></a>
+        <a href="#"><i class="bi bi-instagram text-white mx-2"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NAVBAR ===================================================== -->
+  <header class="bg-white py-3 shadow-sm sticky-top">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg navbar-light bg-white" aria-label="Primary navigation">
+        <a class="navbar-brand" href="/"><img src="images/logo.png" alt="Physio Therapy Logo" class="img-fluid"></a>
+
+        <button class="navbar-toggler d-lg-none" type="button"
+                data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
+                aria-controls="mobileMenu" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <ul class="navbar-nav mx-auto d-none d-lg-flex gap-3">
+          <li class="nav-item"><a class="nav-link text-dark" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" href="/#about">About Us</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" href="/#services">Services</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" href="/#blog">Blog</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" href="/#contact">Contact</a></li>
+        </ul>
+
+        <a href="#" class="btn btn-primary d-none d-lg-inline-block">Book Appointment</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE OFF-CANVAS MENU ==================================== -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="mobileMenuLabel">Menu</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column justify-content-between">
+      <ul class="navbar-nav gap-2">
+        <li class="nav-item"><a class="nav-link" href="/"               data-bs-dismiss="offcanvas">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/#about"         data-bs-dismiss="offcanvas">About Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="/#services"      data-bs-dismiss="offcanvas">Services</a></li>
+        <li class="nav-item"><a class="nav-link" href="/#blog"          data-bs-dismiss="offcanvas">Blog</a></li>
+        <li class="nav-item"><a class="nav-link" href="/#contact"       data-bs-dismiss="offcanvas">Contact</a></li>
+      </ul>
+      <a href="#" class="btn btn-primary mt-4" data-bs-dismiss="offcanvas">Book Appointment</a>
+    </div>
+  </div>
+
+  <!-- ===== HERO BANNER (dynamic) ===================================== -->
+  <header id="heroBanner" class="hero-banner">
     <div class="overlay"></div>
     <div class="container h-100 d-flex align-items-end">
       <h1 id="heroTitle" class="text-white mb-4 display-5"></h1>
     </div>
   </header>
 
-  <!-- article -->
-  <main class="container py-5" id="article"></main>
+  <!-- ===== ARTICLE BODY ============================================= -->
+  <main class="container py-5">
+    <article id="articleContent"></article>
+  </main>
 
+  <!-- ===== FOOTER / MISC ============================================ -->
+  <a href="#" class="back-to-top"><i class="bi bi-arrow-up-circle-fill"></i></a>
+
+  <footer class="bg-dark text-white py-3 text-center">
+    <p>© 2024 Physio Therapy. All rights reserved.</p>
+  </footer>
+
+  <!-- ===== JS ======================================================== -->
+  <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
   <script type="module">
+    /* ------------ helper ------------ */
+    const qs = s => document.querySelector(s);
+
+    /* ------------ fetch & render ------------ */
     const slug = new URLSearchParams(location.search).get('slug');
-    if(!slug) location.href='/';
+    if (!slug) location.href = '/';
 
-    const res  = await fetch(`/api/posts/${encodeURIComponent(slug)}`);
-    if(!res.ok){ document.body.innerHTML='<p class="text-danger p-5">Post not found.</p>'; throw ''; }
-    const p    = await res.json();
+    try {
+      const res  = await fetch(`/api/posts/${encodeURIComponent(slug)}`);
+      if (!res.ok) throw new Error('Post not found');
+      const post = await res.json();
 
-    // hero
-    if(p.img_base){
-      document.getElementById('hero').style.backgroundImage =
-        `url('/uploads/${p.img_base}-hero.jpg')`;
+      /* document title */
+      document.title = `${post.title} – Physio Therapy`;
+
+      /* hero */
+      if (post.img_base) {
+        qs('#heroBanner').style.backgroundImage =
+          `url('/uploads/${post.img_base}-hero.jpg')`;
+      }
+      qs('#heroTitle').textContent = post.title;
+
+      /* body (HTML already rendered by API via marked) */
+      qs('#articleContent').innerHTML = post.content_html;
+    } catch (err) {
+      console.error(err);
+      qs('#articleContent').innerHTML =
+        '<p class="text-danger">Sorry, this article could not be loaded.</p>';
+      qs('#heroTitle').textContent = 'Article not found';
     }
-    document.getElementById('heroTitle').textContent = p.title;
-
-    // body
-    document.getElementById('article').innerHTML = p.content_html;
   </script>
-</body></html>
+</body>
+</html>
