@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><head>
+  <meta charset="utf-8"><title>Post</title>
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/styles3.css">
+</head><body>
+
+  <!-- hero banner -->
+  <header id="hero" class="hero-banner">
+    <div class="overlay"></div>
+    <div class="container h-100 d-flex align-items-end">
+      <h1 id="heroTitle" class="text-white mb-4 display-5"></h1>
+    </div>
+  </header>
+
+  <!-- article -->
+  <main class="container py-5" id="article"></main>
+
+  <script type="module">
+    const slug = new URLSearchParams(location.search).get('slug');
+    if(!slug) location.href='/';
+
+    const res  = await fetch(`/api/posts/${encodeURIComponent(slug)}`);
+    if(!res.ok){ document.body.innerHTML='<p class="text-danger p-5">Post not found.</p>'; throw ''; }
+    const p    = await res.json();
+
+    // hero
+    if(p.img_base){
+      document.getElementById('hero').style.backgroundImage =
+        `url('/uploads/${p.img_base}-hero.jpg')`;
+    }
+    document.getElementById('heroTitle').textContent = p.title;
+
+    // body
+    document.getElementById('article').innerHTML = p.content_html;
+  </script>
+</body></html>
