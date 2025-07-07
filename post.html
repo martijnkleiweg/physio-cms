@@ -14,16 +14,22 @@
   <!-- Hero tweaks -->
   <style>
     .hero-banner{
-      height:45vh;                              /* ~2/3 original */
+      height:45vh;                           /* ≈ 2/3 previous */
       background-size:cover;
-      background-position:center center;
+      background-position:center center;     /* vertical + horizontal centering */
       background-repeat:no-repeat;
+      position:relative;
     }
-    .hero-banner::after{                        /* fade-out */
+    /* fade-out */
+    .hero-banner::after{
       content:'';position:absolute;left:0;right:0;bottom:0;height:140px;
       background:linear-gradient(to bottom,rgba(255,255,255,0)0%,#fff 100%);
-      pointer-events:none;
+      z-index:1;pointer-events:none;
     }
+    /* ensure title sits above fade */
+    .hero-banner .container{position:relative;z-index:2;}
+    /* remove dark overlay so black text stays visible */
+    .hero-banner .overlay{display:none;}
   </style>
 </head>
 <body>
@@ -88,10 +94,9 @@
   </div>
 
   <!-- ===== HERO BANNER =============================================== -->
-  <header id="heroBanner" class="hero-banner position-relative">
-    <div class="overlay"></div>
+  <header id="heroBanner" class="hero-banner">
+    <div class="overlay"></div> <!-- now hidden via CSS -->
     <div class="container h-100 d-flex align-items-end">
-      <!-- title now black -->
       <h1 id="heroTitle" class="mb-4 display-5 text-dark"></h1>
     </div>
   </header>
@@ -115,24 +120,24 @@
     const slug = new URLSearchParams(location.search).get('slug');
     if (!slug) location.href = '/';
 
-    try {
+    try{
       const res  = await fetch(`/api/posts/${encodeURIComponent(slug)}`);
-      if (!res.ok) throw new Error('Post not found');
+      if(!res.ok) throw new Error('Post not found');
       const post = await res.json();
 
-      /* Page title */
+      /* page title */
       document.title = `${post.title} – Physio Therapy`;
 
-      /* Hero banner */
-      if (post.img_base) {
+      /* hero */
+      if (post.img_base){
         qs('#heroBanner').style.backgroundImage =
           `url('/uploads/${post.img_base}-hero.jpg')`;
       }
       qs('#heroTitle').textContent = post.title;
 
-      /* Article body */
+      /* body */
       qs('#articleContent').innerHTML = post.content_html;
-    } catch (err) {
+    }catch(err){
       console.error(err);
       qs('#heroTitle').textContent = 'Article not found';
       qs('#articleContent').innerHTML =
