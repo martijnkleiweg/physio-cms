@@ -11,10 +11,23 @@
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/styles3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+
+  <!-- Extra hero tweaks (move to styles3.css) -->
+  <style>
+    /* taller hero */
+    .hero-banner{height:65vh;}
+
+    /* fade-out strip */
+    .hero-banner::after{
+      content:'';position:absolute;left:0;right:0;bottom:0;height:140px;
+      background:linear-gradient(to bottom,rgba(255,255,255,0)0%,#fff 100%);
+      pointer-events:none;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ===== TOP BAR ==================================================== -->
+  <!-- ========== TOP BAR =============================================== -->
   <div class="top-bar text-white py-2">
     <div class="container d-flex justify-content-between">
       <div class="contact-info">
@@ -30,7 +43,7 @@
     </div>
   </div>
 
-  <!-- ===== NAVBAR ===================================================== -->
+  <!-- ========== NAVBAR ================================================= -->
   <header class="bg-white py-3 shadow-sm sticky-top">
     <div class="container">
       <nav class="navbar navbar-expand-lg navbar-light bg-white" aria-label="Primary navigation">
@@ -55,7 +68,7 @@
     </div>
   </header>
 
-  <!-- ===== MOBILE OFF-CANVAS MENU ==================================== -->
+  <!-- ========== OFF-CANVAS (mobile) =================================== -->
   <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="mobileMenuLabel">Menu</h5>
@@ -63,43 +76,40 @@
     </div>
     <div class="offcanvas-body d-flex flex-column justify-content-between">
       <ul class="navbar-nav gap-2">
-        <li class="nav-item"><a class="nav-link" href="/"               data-bs-dismiss="offcanvas">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#about"         data-bs-dismiss="offcanvas">About Us</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#services"      data-bs-dismiss="offcanvas">Services</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#blog"          data-bs-dismiss="offcanvas">Blog</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#contact"       data-bs-dismiss="offcanvas">Contact</a></li>
+        <li class="nav-item"><a class="nav-link" href="/" data-bs-dismiss="offcanvas">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/#about" data-bs-dismiss="offcanvas">About Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="/#services" data-bs-dismiss="offcanvas">Services</a></li>
+        <li class="nav-item"><a class="nav-link" href="/#blog" data-bs-dismiss="offcanvas">Blog</a></li>
+        <li class="nav-item"><a class="nav-link" href="/#contact" data-bs-dismiss="offcanvas">Contact</a></li>
       </ul>
       <a href="#" class="btn btn-primary mt-4" data-bs-dismiss="offcanvas">Book Appointment</a>
     </div>
   </div>
 
-  <!-- ===== HERO BANNER (dynamic) ===================================== -->
-  <header id="heroBanner" class="hero-banner">
+  <!-- ========== HERO BANNER (dynamic) ================================= -->
+  <header id="heroBanner" class="hero-banner position-relative">
     <div class="overlay"></div>
     <div class="container h-100 d-flex align-items-end">
       <h1 id="heroTitle" class="text-white mb-4 display-5"></h1>
     </div>
   </header>
 
-  <!-- ===== ARTICLE BODY ============================================= -->
+  <!-- ========== ARTICLE CONTENT ====================================== -->
   <main class="container py-5">
     <article id="articleContent"></article>
   </main>
 
-  <!-- ===== FOOTER / MISC ============================================ -->
+  <!-- ========== FOOTER / BACK-TO-TOP =================================  -->
   <a href="#" class="back-to-top"><i class="bi bi-arrow-up-circle-fill"></i></a>
 
   <footer class="bg-dark text-white py-3 text-center">
     <p>© 2024 Physio Therapy. All rights reserved.</p>
   </footer>
 
-  <!-- ===== JS ======================================================== -->
+  <!-- ========== JS ==================================================== -->
   <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    /* ------------ helper ------------ */
     const qs = s => document.querySelector(s);
-
-    /* ------------ fetch & render ------------ */
     const slug = new URLSearchParams(location.search).get('slug');
     if (!slug) location.href = '/';
 
@@ -108,23 +118,23 @@
       if (!res.ok) throw new Error('Post not found');
       const post = await res.json();
 
-      /* document title */
+      /* SEO title */
       document.title = `${post.title} – Physio Therapy`;
 
-      /* hero */
-      if (post.img_base) {
+      /* hero image + title */
+      if (post.img_base){
         qs('#heroBanner').style.backgroundImage =
           `url('/uploads/${post.img_base}-hero.jpg')`;
       }
       qs('#heroTitle').textContent = post.title;
 
-      /* body (HTML already rendered by API via marked) */
+      /* article body (HTML from API) */
       qs('#articleContent').innerHTML = post.content_html;
     } catch (err) {
       console.error(err);
+      qs('#heroTitle').textContent = 'Article not found';
       qs('#articleContent').innerHTML =
         '<p class="text-danger">Sorry, this article could not be loaded.</p>';
-      qs('#heroTitle').textContent = 'Article not found';
     }
   </script>
 </body>
