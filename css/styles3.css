@@ -357,3 +357,26 @@ header.sticky-top{
 @media (min-width: 1200px){
     .navbar-brand img { max-height: 100px; }   /* was 120 */
 }
+
+/* === CARD / HERO IMAGES ========================================= */
+.card-img-top {
+  height: 250px;            /* matches 400×250 resize */
+  object-fit: cover;
+}
+
+.hero-banner {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  height: 45vh;             /* 45% viewport height */
+}
+
+.hero-banner .overlay {
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.45);
+}
+
+/* === EDITOR ========================================= */
+
+.EasyMDEContainer .CodeMirror,
+.EasyMDEContainer .CodeMirror-scroll { min-height: 300px; max-height: 600px; }

@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title><%= post ? 'Edit' : 'New' %> Post</title>
+  <link href="https://unpkg.com/easymde/dist/easymde.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="container py-5">
@@ -28,8 +29,7 @@
     </select>
 
     <!-- markdown -->
-    <textarea class="form-control" rows="12" name="content_md"
-              placeholder="# Markdown here"><%= post ? post.content_md : '' %></textarea>
+    <textarea id="editor" name="content_md"><%= post ? post.content_md : '' %></textarea>
 
     <!-- excerpt -->
     <textarea class="form-control" rows="3"  name="excerpt"
@@ -67,7 +67,20 @@
   <ul id="postList" class="list-group"></ul>
 
   <!-- =========================  SCRIPTS  ========================= -->
+  <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+
+
   <script type="module">
+
+    /* ---------- EasyMDE init ---------- */
+    const easyMDE = new EasyMDE({
+      element: document.getElementById('editor'),
+      spellChecker: false,
+      status: false,
+      autofocus: false,
+      placeholder: 'Start writing…'
+    });
+
     const qs = s => document.querySelector(s);
 
     /* ---------- Save ---------- */
