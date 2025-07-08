@@ -367,7 +367,7 @@ header.sticky-top{
 .hero-banner {
   position: relative;
   background-size: cover;
-  background-position: center;
+  background-position: top center;
   height: 45vh;             /* 45% viewport height */
 }
 
