@@ -98,6 +98,29 @@ app.post('/admin/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+/* === inline-image upload for EasyMDE ================================= */
+app.post('/admin/upload-inline', upload.single('file'), async (req, res) => {
+  try {
+    const srcPath  = req.file.path;
+    const basename = Date.now();                                // unique id
+    const outDir   = path.join(__dirname, 'public/uploads');
+
+    // 800px wide “body” image (keeps aspect)
+    const bodyName = `${basename}-body.jpg`;
+    await sharp(srcPath)
+      .resize({ width: 800 })
+      .jpeg({ quality: 82 })
+      .toFile(path.join(outDir, bodyName));
+
+    fs.unlinkSync(srcPath);                                     // remove temp
+    res.json({ url: `/uploads/${bodyName}` });                  // 👈 EasyMDE needs {url:"…"}
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error:'inline upload failed' });
+  }
+});
+
+
 /* ---------- Boot ---------- */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Physio CMS running on http://localhost:${PORT}`));
