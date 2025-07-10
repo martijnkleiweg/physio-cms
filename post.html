@@ -14,27 +14,23 @@
   <!-- Hero tweaks -->
   <style>
     .hero-banner{
-      height:45vh;                           /* ≈ 2/3 previous */
+      height:45vh;
       background-size:cover;
-      background-position:center center;     /* vertical + horizontal centering */
+      background-position:center;
       background-repeat:no-repeat;
       position:relative;
     }
-    /* fade-out */
     .hero-banner::after{
       content:'';position:absolute;left:0;right:0;bottom:0;height:140px;
       background:linear-gradient(to bottom,rgba(255,255,255,0)0%,#fff 100%);
       z-index:1;pointer-events:none;
     }
-    /* ensure title sits above fade */
     .hero-banner .container{position:relative;z-index:2;}
-    /* remove dark overlay so black text stays visible */
     .hero-banner .overlay{display:none;}
   </style>
 </head>
 <body>
-
-  <!-- ===== TOP BAR ==================================================== -->
+  <!-- ===== TOP BAR etc. (unchanged) =================================== -->
   <div class="top-bar text-white py-2">
     <div class="container d-flex justify-content-between">
       <div class="contact-info">
@@ -50,7 +46,7 @@
     </div>
   </div>
 
-  <!-- ===== NAVBAR ===================================================== -->
+  <!-- ===== NAVBAR (unchanged) ======================================== -->
   <header class="bg-white py-3 shadow-sm sticky-top">
     <div class="container">
       <nav class="navbar navbar-expand-lg navbar-light bg-white" aria-label="Primary navigation">
@@ -95,7 +91,7 @@
 
   <!-- ===== HERO BANNER =============================================== -->
   <header id="heroBanner" class="hero-banner">
-    <div class="overlay"></div> <!-- now hidden via CSS -->
+    <div class="overlay"></div>
     <div class="container h-100 d-flex align-items-end">
       <h1 id="heroTitle" class="mb-4 display-5 text-dark"></h1>
     </div>
@@ -116,33 +112,30 @@
   <!-- ===== JS ======================================================== -->
   <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    const qs = s => document.querySelector(s);
+    const qs   = sel => document.querySelector(sel);
     const slug = new URLSearchParams(location.search).get('slug');
     if (!slug) location.href = '/';
 
-    try{
-      const res  = await fetch(`/api/posts/${encodeURIComponent(slug)}`);
-      if(!res.ok) throw new Error('Post not found');
-      const post = await res.json();
+    (async () => {
+      try {
+        const r = await fetch(`/api/posts/${encodeURIComponent(slug)}`);
+        if (!r.ok) throw new Error('404');
+        const post = await r.json();
 
-      /* page title */
-      document.title = `${post.title} – Physio Therapy`;
+        document.title = `${post.title} – Physio Therapy`;
+        qs('#heroTitle').textContent = post.title;
 
-      /* hero */
-      if (post.image_url){
-        qs('#heroBanner').style.backgroundImage =
-          `url('/uploads/${post.image_url}-hero.jpg')`;
+        if (post.image_url){
+          qs('#heroBanner').style.backgroundImage = `url('${post.image_url}')`;
+        }
+        qs('#articleContent').innerHTML = post.content_html;
+
+      } catch (err) {
+        qs('#heroTitle').textContent = 'Article not found';
+        qs('#articleContent').innerHTML =
+          '<p class="text-danger">Sorry, this article could not be loaded.</p>';
       }
-      qs('#heroTitle').textContent = post.title;
-
-      /* body */
-      qs('#articleContent').innerHTML = post.content_html;
-    }catch(err){
-      console.error(err);
-      qs('#heroTitle').textContent = 'Article not found';
-      qs('#articleContent').innerHTML =
-        '<p class="text-danger">Sorry, this article could not be loaded.</p>';
-    }
+    })();
   </script>
 </body>
 </html>

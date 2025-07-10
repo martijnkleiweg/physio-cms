@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Meta -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Physio Therapy</title>
@@ -13,7 +12,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
 </head>
 <body>
-
   <!-- ===== TOP BAR ==================================================== -->
   <div class="top-bar text-white py-2">
     <div class="container d-flex justify-content-between">
@@ -109,26 +107,20 @@
   <!-- ===== JS ========================================================= -->
   <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
-  <!-- ============  Dynamic content loader  ============ -->
+<!-- ============  Dynamic content loader  ============ -->
 <script type="module">
   async function getPosts () {
-    try {
-      const r = await fetch('/api/posts');
-      if (!r.ok) throw new Error('API error');
-      return (await r.json()).filter(p => p.published);
-    } catch (err) {
-      console.error(err);
-      return [];
-    }
+    const r = await fetch('/api/posts');
+    return r.ok ? (await r.json()).filter(p => p.published) : [];
   }
 
-  /* ------------ card factory (uses image_url-card.jpg) ------------ */
+  /* ------------ card factory (uses image_url directly) ------------ */
   function card (p) {
-    const cardImg = p.image_url ? `/uploads/${p.image_url}-card.jpg` : '';
+    const imgTag = p.image_url ? `<img src="${p.image_url}" class="card-img-top" alt="${p.title}">` : '';
     return `
       <div class="col-md-4">
         <div class="card shadow h-100">
-          ${cardImg ? `<img src="${cardImg}" class="card-img-top" alt="${p.title}">` : ''}
+          ${imgTag}
           <div class="card-body d-flex flex-column">
             <h5 class="card-title">${p.title}</h5>
             <p class="card-text flex-grow-1">${p.excerpt ?? ''}</p>
@@ -139,27 +131,20 @@
       </div>`;
   }
 
-  /* ------------ render Services + Latest News ------------ */
+  /* ------------ render Services & Latest News ------------ */
   (async () => {
     const posts = await getPosts();
 
-    /* Services */
-    const servicesHtml = posts
-      .filter(p => p.category === 'service')
-      .map(card).join('');
     document.getElementById('servicesRow').innerHTML =
-      servicesHtml || '<p class="text-muted">Services coming soon.</p>';
+      posts.filter(p => p.category === 'service').map(card).join('') ||
+      '<p class="text-muted">Services coming soon.</p>';
 
-    /* Latest news – newest 3 */
-    const newsHtml = posts
-      .filter(p => p.category === 'news')
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-      .slice(0, 3)
-      .map(card).join('');
     document.getElementById('newsRow').innerHTML =
-      newsHtml || '<p class="text-muted">No news yet.</p>';
+      posts.filter(p => p.category === 'news')
+           .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
+           .slice(0,3).map(card).join('') ||
+      '<p class="text-muted">No news yet.</p>';
   })();
 </script>
-
 </body>
 </html>
