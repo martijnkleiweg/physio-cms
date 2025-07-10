@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------
-   server.js – Physio CMS API + Admin UI
+   server.js – Physio CMS API + Admin UI  (single-image version)
 ----------------------------------------------------------- */
 
 const express   = require('express');
@@ -17,19 +17,19 @@ const app = express();
 /* ---------- global middleware ---------- */
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // /admin JS/CSS + /uploads
+app.use(express.static(path.join(__dirname, 'public'))); // /uploads + admin assets
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-/* ---------- file-upload (tmp folder) ---------- */
+/* ---------- upload config (tmp) ---------- */
 const tmpDir = path.join(__dirname, 'public/uploads/tmp');
 fs.mkdirSync(tmpDir, { recursive: true });
 const upload = multer({ dest: tmpDir });
 
-/* ---------- API consumed by front-end ---------- */
-app.get('/api/posts', (_, res) => {
-  res.json(db.all());                    // all rows newest-first
-});
+/* ===========================================================
+   PUBLIC API – consumed by front-end
+=========================================================== */
+app.get('/api/posts', (_ ,res) => res.json(db.all()));
 
 app.get('/api/posts/:slug', (req, res) => {
   const row = db.find(req.params.slug);
@@ -37,90 +37,97 @@ app.get('/api/posts/:slug', (req, res) => {
   res.json({ ...row, content_html: marked.parse(row.content_md) });
 });
 
-/* ---------- basic-auth for /admin ---------- */
+/* ===========================================================
+   Admin area guarded by Basic-Auth
+=========================================================== */
 app.use('/admin', basicAuth({
-  users    : { editor: process.env.ADMIN_PW || 'ChangeMe123' },
-  challenge: true,
-  realm    : 'PhysioCMS'
+  users     : { editor: process.env.ADMIN_PW || 'ChangeMe123' },
+  challenge : true,
+  realm     : 'PhysioCMS'
 }));
 
-/* ---------- Admin UI ---------- */
-app.get('/admin',        (_,   res) => res.render('editor', { post: null }));
-app.get('/admin/:slug',  (req, res) => {
+/* ---------- editor UI ---------- */
+app.get('/admin',        (_ ,res) => res.render('editor', { post: null }));
+app.get('/admin/:slug',  (req,res) => {
   const post = db.find(req.params.slug);
   if (!post) return res.redirect('/admin');
   res.render('editor', { post });
 });
 
-/* ---------- Save / Update ---------- */
+/* ===========================================================
+   CRUD
+=========================================================== */
 app.post('/admin/save', (req, res) => {
   const p = req.body;
   p.published = p.published ? 1 : 0;
   p.category  = p.category  || 'news';
-  p.img_base  = p.img_base  || '';      // <-- STORE img_base, not image_url
+  p.image_url = p.image_url || '';      //  <-- guarantee param exists
 
   if (db.find(p.slug)) db.update(p);
   else                 db.insert(p);
 
-  res.json({ ok: true });
+  res.json({ ok:true });
 });
 
-/* ---------- Delete ---------- */
-app.delete('/admin/:slug', (req, res) => {
+app.delete('/admin/:slug', (req,res) => {
   db.del(req.params.slug);
-  res.json({ ok: true });
+  res.json({ ok:true });
 });
 
-/* ---------- Image upload → resize hero & card ---------- */
+/* ===========================================================
+   Image upload  (creates 1280×720 hero  & 400×250 card)
+   Returns a single URL  → front-end stores it in image_url
+=========================================================== */
 app.post('/admin/upload', upload.single('file'), async (req, res) => {
   try {
-    const srcPath  = req.file.path;
-    const outDir   = path.join(__dirname, 'public/uploads');
-    const basename = Date.now().toString();          // unique id
+    const srcPath   = req.file.path;
+    const outDir    = path.join(__dirname, 'public/uploads');
+    const basename  = Date.now().toString();          // unique ID
 
-    // hero 1280×720
+    // 1280×720 hero (kept for possible future use)
     await sharp(srcPath)
-      .resize(1280, 720, { fit: 'cover' })
-      .jpeg({ quality: 80 })
+      .resize(1280, 720, { fit:'cover' })
+      .jpeg({ quality:80 })
       .toFile(path.join(outDir, `${basename}-hero.jpg`));
 
-    // card 400×250
+    // 400×250 card – this is what the site actually displays
+    const cardName  = `${basename}-card.jpg`;
     await sharp(srcPath)
-      .resize(400, 250, { fit: 'cover' })
-      .jpeg({ quality: 80 })
-      .toFile(path.join(outDir, `${basename}-card.jpg`));
+      .resize(400, 250, { fit:'cover' })
+      .jpeg({ quality:80 })
+      .toFile(path.join(outDir, cardName));
 
-    fs.unlinkSync(srcPath);                          // remove temp file
-    res.json({ basename });                          // => { "basename": "17195..." }
+    fs.unlinkSync(srcPath);                          // remove temp upload
+    res.json({ url:`/uploads/${cardName}` });        // editor uses this directly
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Image processing failed' });
+    res.status(500).json({ error:'Image processing failed' });
   }
 });
 
-/* === inline-image upload for EasyMDE ================================= */
-app.post('/admin/upload-inline', upload.single('file'), async (req, res) => {
+/* ---------- inline image for EasyMDE (optional) ---------- */
+app.post('/admin/upload-inline', upload.single('file'), async (req,res) => {
   try {
     const srcPath  = req.file.path;
-    const basename = Date.now();                                // unique id
     const outDir   = path.join(__dirname, 'public/uploads');
+    const name     = `${Date.now()}-body.jpg`;
 
-    // 800px wide “body” image (keeps aspect)
-    const bodyName = `${basename}-body.jpg`;
     await sharp(srcPath)
-      .resize({ width: 800 })
-      .jpeg({ quality: 82 })
-      .toFile(path.join(outDir, bodyName));
+      .resize({ width:800 })
+      .jpeg({ quality:82 })
+      .toFile(path.join(outDir, name));
 
-    fs.unlinkSync(srcPath);                                     // remove temp
-    res.json({ url: `/uploads/${bodyName}` });                  // 👈 EasyMDE needs {url:"…"}
+    fs.unlinkSync(srcPath);
+    res.json({ url:`/uploads/${name}` });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error:'inline upload failed' });
+    res.status(500).json({ error:'Inline upload failed' });
   }
 });
 
-
-/* ---------- Boot ---------- */
+/* ===========================================================
+   Boot
+=========================================================== */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Physio CMS running on http://localhost:${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Physio CMS running on http://localhost:${PORT}`));
