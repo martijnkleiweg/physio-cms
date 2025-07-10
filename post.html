@@ -129,9 +129,9 @@
       document.title = `${post.title} – Physio Therapy`;
 
       /* hero */
-      if (post.img_base){
+      if (post.image_url){
         qs('#heroBanner').style.backgroundImage =
-          `url('/uploads/${post.img_base}-hero.jpg')`;
+          `url('/uploads/${post.image_url}-hero.jpg')`;
       }
       qs('#heroTitle').textContent = post.title;
 

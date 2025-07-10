@@ -122,9 +122,9 @@
     }
   }
 
-  /* ------------ card factory (uses img_base-card.jpg) ------------ */
+  /* ------------ card factory (uses image_url-card.jpg) ------------ */
   function card (p) {
-    const cardImg = p.img_base ? `/uploads/${p.img_base}-card.jpg` : '';
+    const cardImg = p.image_url ? `/uploads/${p.image_url}-card.jpg` : '';
     return `
       <div class="col-md-4">
         <div class="card shadow h-100">
