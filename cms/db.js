@@ -1,4 +1,4 @@
-// db.js – SQLite wrapper for Physio CMS
+// db.js – SQLite wrapper (original version, uses image_url only)
 const path     = require('path');
 const Database = require('better-sqlite3');
 
@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS posts (
   content_md  TEXT NOT NULL,
   excerpt     TEXT,
   category    TEXT DEFAULT 'news',
-  img_base    TEXT,                     -- <id>  (use -card / -hero suffix in front-end)
-  published   INTEGER DEFAULT 0,        -- 0 = draft, 1 = live
+  image_url   TEXT DEFAULT '',
+  published   INTEGER DEFAULT 0,
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -35,9 +35,9 @@ const STMT = {
 
   insert: db.prepare(`
     INSERT INTO posts
-      (title, slug, content_md, excerpt, category, img_base, published)
+      (title, slug, content_md, excerpt, category, image_url, published)
     VALUES
-      (@title, @slug, @content_md, @excerpt, @category, @img_base, @published)
+      (@title, @slug, @content_md, @excerpt, @category, @image_url, @published)
   `),
 
   update: db.prepare(`
@@ -46,7 +46,7 @@ const STMT = {
       content_md  = @content_md,
       excerpt     = @excerpt,
       category    = @category,
-      img_base    = @img_base,
+      image_url   = @image_url,
       published   = @published,
       updated_at  = CURRENT_TIMESTAMP
     WHERE slug = @slug
@@ -69,7 +69,7 @@ module.exports = {
     return STMT.get.get(slug);
   },
 
-  /** @param {object} p – must contain slug,title,content_md,category,img_base,published */
+  /** @param {object} p – must contain slug,title,content_md,category,image_url,published */
   insert (p) {
     STMT.insert.run(p);
   },
