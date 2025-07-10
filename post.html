@@ -11,24 +11,33 @@
   <link rel="stylesheet" href="css/styles3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
 
-  <!-- Hero tweaks -->
   <style>
+    /* Hero tweaks */
     .hero-banner{
       height:45vh;
       background-size:cover;
-      background-position: center;
+      background-position:center;
       background-repeat:no-repeat;
       position:relative;
     }
-    /* gentle fade-out into white */
+
+    /* gentle fade-out into white – pinned to the bottom only */
     .hero-banner::after{
-      content:'';position:absolute;inset:0 auto 0 0;height:140px;
-      bottom:0;left:0;right:0;
-      background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,#fff 100%);
-      z-index:1;pointer-events:none;
+      content:'';
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;                /* stay at the bottom */
+      height:140px;
+      background:linear-gradient(to bottom,
+                  rgba(255,255,255,0) 0%,
+                  #fff 100%);
+      z-index:1;
+      pointer-events:none;
     }
-    .hero-banner .container{position:relative;z-index:2;}
-    .hero-banner .overlay{display:none;} /* remove dark overlay */
+
+    .hero-banner .container{ position:relative; z-index:2; }
+    .hero-banner .overlay  { display:none; }  /* keep overlay hidden */
   </style>
 </head>
 <body>
