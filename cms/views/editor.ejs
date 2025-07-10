@@ -6,10 +6,7 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-  <style>
-    /* make EasyMDE fit nicely */
-    .EasyMDEContainer { border-radius:.375rem; overflow:hidden; }
-  </style>
+  <style>.EasyMDEContainer{border-radius:.375rem;overflow:hidden;}</style>
 </head>
 <body class="container py-5">
 
@@ -18,14 +15,14 @@
   <!-- =========================  EDITOR FORM  ========================= -->
   <form id="postForm" class="vstack gap-4">
 
-    <!-- Title -->
+    <!-- --- TITLE ---------------------------------------------------- -->
     <div>
       <label class="form-label fw-semibold">Title</label>
       <input class="form-control" name="title" placeholder="Article title"
              value="<%= post ? post.title : '' %>" required>
     </div>
 
-    <!-- Slug -->
+    <!-- --- SLUG ----------------------------------------------------- -->
     <div>
       <label class="form-label fw-semibold">Slug (URL)</label>
       <input class="form-control" name="slug" placeholder="slug-my-post"
@@ -33,7 +30,7 @@
       <div class="form-text">Lower-case letters, numbers and dashes only.</div>
     </div>
 
-    <!-- Category -->
+    <!-- --- CATEGORY ------------------------------------------------- -->
     <div>
       <label class="form-label fw-semibold">Category</label>
       <% const cat = post ? post.category : 'news'; %>
@@ -44,38 +41,48 @@
       </select>
     </div>
 
-    <!-- EasyMDE -->
+    <!-- --- MARKDOWN ------------------------------------------------- -->
     <div>
       <label class="form-label fw-semibold">Content (Markdown)</label>
       <textarea id="editor" name="content_md"><%= post ? post.content_md : '' %></textarea>
     </div>
 
-    <!-- Excerpt -->
+    <!-- --- EXCERPT -------------------------------------------------- -->
     <div>
       <label class="form-label fw-semibold">Excerpt (optional)</label>
       <textarea class="form-control" rows="3" name="excerpt"
                 placeholder="Short summary shown on cards"><%= post ? post.excerpt : '' %></textarea>
     </div>
 
-    <!-- Featured image -->
+    <!-- --- FEATURED / CARD IMAGE ----------------------------------- -->
     <div>
-      <label class="form-label fw-semibold">Featured image (card & hero)</label>
-      <input type="file" id="imgInput" accept="image/*" class="form-control">
-      <!-- old schema uses image_url -->
+      <label class="form-label fw-semibold">Featured image (card)</label>
+      <input type="file" id="cardInput" accept="image/*" class="form-control">
       <input type="hidden" name="image_url" value="<%= post ? post.image_url : '' %>">
-      <img id="imgPreview"
+      <img id="cardPreview"
            src="<%= post && post.image_url ? post.image_url : '' %>"
            style="max-width:220px;<%= post && post.image_url ? '' : 'display:none' %>;margin-top:.75rem;">
     </div>
 
-    <!-- Publish switch -->
+    <!-- --- HERO IMAGE ---------------------------------------------- -->
+    <div>
+      <label class="form-label fw-semibold">Hero image (banner 1280×720)</label>
+      <input type="file" id="heroInput" accept="image/*" class="form-control">
+      <input type="hidden" name="hero_url" value="<%= post ? post.hero_url : '' %>">
+      <img id="heroPreview"
+           src="<%= post && post.hero_url ? post.hero_url : '' %>"
+           style="max-width:220px;<%= post && post.hero_url ? '' : 'display:none' %>;margin-top:.75rem;">
+      <div class="form-text">Optional. If omitted, banner falls back to the featured image.</div>
+    </div>
+
+    <!-- --- PUBLISH SWITCH ------------------------------------------ -->
     <div class="form-check form-switch">
       <input class="form-check-input" type="checkbox" name="published" value="1"
              id="pubSwitch" <%= post && post.published ? 'checked' : '' %>>
       <label class="form-check-label fw-semibold" for="pubSwitch">Published</label>
     </div>
 
-    <!-- Buttons -->
+    <!-- --- BUTTONS -------------------------------------------------- -->
     <div>
       <button class="btn btn-primary">Save</button>
       <% if (post) { %>
@@ -105,7 +112,7 @@
     /* ---------- Save ---------- */
     qs('#postForm').addEventListener('submit', async e => {
       e.preventDefault();
-      qs('[name="content_md"]').value = easyMDE.value();   // sync editor
+      qs('[name="content_md"]').value = easyMDE.value();  // sync
       const data = Object.fromEntries(new FormData(e.target));
       data.published = data.published ? 1 : 0;
 
@@ -125,21 +132,38 @@
     });
     <% } %>
 
-    /* ---------- Featured-image upload ---------- */
-    const imgInput   = qs('#imgInput');
-    const imgPreview = qs('#imgPreview');
+    /* ---------- Upload helper ---------- */
+    async function doUpload(file){
+      const fd = new FormData(); fd.append('file', file);
+      const r  = await fetch('/admin/upload', { method:'POST', body:fd });
+      if (!r.ok) throw new Error('upload failed');
+      return await r.json();                 // { basename, hero, card }
+    }
 
-    imgInput?.addEventListener('change', async () => {
-      if (!imgInput.files.length) return;
-      const fd = new FormData();
-      fd.append('file', imgInput.files[0]);
+    /* ---------- CARD upload ---------- */
+    const cardInput   = qs('#cardInput');
+    const cardPreview = qs('#cardPreview');
+    cardInput?.addEventListener('change', async () => {
+      if (!cardInput.files.length) return;
+      try{
+        const { card } = await doUpload(cardInput.files[0]);
+        qs('[name=image_url]').value = card;
+        cardPreview.src   = card;
+        cardPreview.style.display = 'block';
+      }catch(err){ alert(err.message); }
+    });
 
-      const r = await fetch('/admin/upload', { method:'POST', body:fd });
-      if (!r.ok) { alert('Upload failed'); return; }
-      const { url } = await r.json();           // { url:"/uploads/…jpg" }
-      qs('[name=image_url]').value = url;       // old schema field
-      imgPreview.src = url;
-      imgPreview.style.display = 'block';
+    /* ---------- HERO upload ---------- */
+    const heroInput   = qs('#heroInput');
+    const heroPreview = qs('#heroPreview');
+    heroInput?.addEventListener('change', async () => {
+      if (!heroInput.files.length) return;
+      try{
+        const { hero } = await doUpload(heroInput.files[0]);
+        qs('[name=hero_url]').value = hero;
+        heroPreview.src   = hero;
+        heroPreview.style.display = 'block';
+      }catch(err){ alert(err.message); }
     });
 
     /* ---------- List ---------- */

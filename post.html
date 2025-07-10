@@ -16,21 +16,24 @@
     .hero-banner{
       height:45vh;
       background-size:cover;
-      background-position:top center;
+      background-position:center center;
       background-repeat:no-repeat;
       position:relative;
     }
+    /* gentle fade-out into white */
     .hero-banner::after{
-      content:'';position:absolute;left:0;right:0;bottom:0;height:140px;
-      background:linear-gradient(to bottom,rgba(255,255,255,0)0%,#fff 100%);
+      content:'';position:absolute;inset:0 auto 0 0;height:140px;
+      bottom:0;left:0;right:0;
+      background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,#fff 100%);
       z-index:1;pointer-events:none;
     }
     .hero-banner .container{position:relative;z-index:2;}
-    .hero-banner .overlay{display:none;}
+    .hero-banner .overlay{display:none;} /* remove dark overlay */
   </style>
 </head>
 <body>
-  <!-- ===== TOP BAR etc. (unchanged) =================================== -->
+
+  <!-- ===== TOP BAR (unchanged) ====================================== -->
   <div class="top-bar text-white py-2">
     <div class="container d-flex justify-content-between">
       <div class="contact-info">
@@ -46,7 +49,7 @@
     </div>
   </div>
 
-  <!-- ===== NAVBAR (unchanged) ======================================== -->
+  <!-- ===== NAVBAR (unchanged) ======================================= -->
   <header class="bg-white py-3 shadow-sm sticky-top">
     <div class="container">
       <nav class="navbar navbar-expand-lg navbar-light bg-white" aria-label="Primary navigation">
@@ -60,18 +63,18 @@
 
         <ul class="navbar-nav mx-auto d-none d-lg-flex gap-3">
           <li class="nav-item"><a class="nav-link text-dark" href="/">Home</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="/#about">About Us</a></li>
+          <li class="nav-item"><a class="nav-link text-dark" href="/#about">About&nbsp;Us</a></li>
           <li class="nav-item"><a class="nav-link text-dark" href="/#services">Services</a></li>
           <li class="nav-item"><a class="nav-link text-dark" href="/#blog">Blog</a></li>
           <li class="nav-item"><a class="nav-link text-dark" href="/#contact">Contact</a></li>
         </ul>
 
-        <a href="#" class="btn btn-primary d-none d-lg-inline-block">Book Appointment</a>
+        <a href="#" class="btn btn-primary d-none d-lg-inline-block">Book&nbsp;Appointment</a>
       </nav>
     </div>
   </header>
 
-  <!-- ===== MOBILE OFF-CANVAS MENU ==================================== -->
+  <!-- ===== MOBILE OFF-CANVAS (unchanged) ============================ -->
   <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="mobileMenuLabel">Menu</h5>
@@ -80,16 +83,16 @@
     <div class="offcanvas-body d-flex flex-column justify-content-between">
       <ul class="navbar-nav gap-2">
         <li class="nav-item"><a class="nav-link" href="/" data-bs-dismiss="offcanvas">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#about" data-bs-dismiss="offcanvas">About Us</a></li>
+        <li class="nav-item"><a class="nav-link" href="/#about" data-bs-dismiss="offcanvas">About&nbsp;Us</a></li>
         <li class="nav-item"><a class="nav-link" href="/#services" data-bs-dismiss="offcanvas">Services</a></li>
         <li class="nav-item"><a class="nav-link" href="/#blog" data-bs-dismiss="offcanvas">Blog</a></li>
         <li class="nav-item"><a class="nav-link" href="/#contact" data-bs-dismiss="offcanvas">Contact</a></li>
       </ul>
-      <a href="#" class="btn btn-primary mt-4" data-bs-dismiss="offcanvas">Book Appointment</a>
+      <a href="#" class="btn btn-primary mt-4" data-bs-dismiss="offcanvas">Book&nbsp;Appointment</a>
     </div>
   </div>
 
-  <!-- ===== HERO BANNER =============================================== -->
+  <!-- ===== HERO ===================================================== -->
   <header id="heroBanner" class="hero-banner">
     <div class="overlay"></div>
     <div class="container h-100 d-flex align-items-end">
@@ -97,19 +100,19 @@
     </div>
   </header>
 
-  <!-- ===== ARTICLE BODY ============================================= -->
+  <!-- ===== ARTICLE ================================================== -->
   <main class="container py-5">
     <article id="articleContent"></article>
   </main>
 
-  <!-- ===== FOOTER / BACK-TO-TOP ===================================== -->
+  <!-- ===== FOOTER & TOP BUTTON ====================================== -->
   <a href="#" class="back-to-top"><i class="bi bi-arrow-up-circle-fill"></i></a>
 
   <footer class="bg-dark text-white py-3 text-center">
-    <p>© 2024 Physio Therapy. All rights reserved.</p>
+    <p>© 2024 Physio&nbsp;Therapy. All rights reserved.</p>
   </footer>
 
-  <!-- ===== JS ======================================================== -->
+  <!-- ===== JS ======================================================= -->
   <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
   <script type="module">
     const qs   = sel => document.querySelector(sel);
@@ -122,16 +125,20 @@
         if (!r.ok) throw new Error('404');
         const post = await r.json();
 
-        document.title = `${post.title} – Physio Therapy`;
+        /* Title & meta-title */
+        document.title            = `${post.title} – Physio Therapy`;
         qs('#heroTitle').textContent = post.title;
 
-        if (post.image_url){
-          qs('#heroBanner').style.backgroundImage = `url('${post.image_url}')`;
-        }
+        /* Hero background – hero_url first, else image_url */
+        const bg = post.hero_url || post.image_url || '';
+        if (bg) qs('#heroBanner').style.backgroundImage = `url('${bg}')`;
+
+        /* Article body (pre-rendered markdown) */
         qs('#articleContent').innerHTML = post.content_html;
 
       } catch (err) {
-        qs('#heroTitle').textContent = 'Article not found';
+        console.error(err);
+        qs('#heroTitle').textContent   = 'Article not found';
         qs('#articleContent').innerHTML =
           '<p class="text-danger">Sorry, this article could not be loaded.</p>';
       }

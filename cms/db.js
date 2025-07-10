@@ -1,16 +1,15 @@
-// db.js – SQLite wrapper (original version, uses image_url only)
+/* -----------------------------------------------------------
+   db.js – SQLite wrapper for Physio CMS
+   Adds hero_url (1280×720 banner) alongside image_url (card).
+----------------------------------------------------------- */
 const path     = require('path');
 const Database = require('better-sqlite3');
 
-// --------------------------------------------------
-// open / create DB file
-// --------------------------------------------------
+/* ---------- open / create DB file ---------- */
 const dbPath = path.join(__dirname, 'data', 'physio.sqlite');
 const db     = new Database(dbPath);
 
-// --------------------------------------------------
-// ensure table exists
-// --------------------------------------------------
+/* ---------- ensure table exists / evolved ---------- */
 db.exec(`
 CREATE TABLE IF NOT EXISTS posts (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,24 +19,25 @@ CREATE TABLE IF NOT EXISTS posts (
   excerpt     TEXT,
   category    TEXT DEFAULT 'news',
   image_url   TEXT DEFAULT '',
+  hero_url    TEXT DEFAULT '',
   published   INTEGER DEFAULT 0,
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 `);
 
-// --------------------------------------------------
-// prepared statements
-// --------------------------------------------------
+/* ---------- prepared statements ---------- */
 const STMT = {
   all   : db.prepare(`SELECT * FROM posts ORDER BY created_at DESC`),
   get   : db.prepare(`SELECT * FROM posts WHERE slug = ? LIMIT 1`),
 
   insert: db.prepare(`
     INSERT INTO posts
-      (title, slug, content_md, excerpt, category, image_url, published)
+      (title, slug, content_md, excerpt, category,
+       image_url, hero_url, published)
     VALUES
-      (@title, @slug, @content_md, @excerpt, @category, @image_url, @published)
+      (@title, @slug, @content_md, @excerpt, @category,
+       @image_url, @hero_url, @published)
   `),
 
   update: db.prepare(`
@@ -47,6 +47,7 @@ const STMT = {
       excerpt     = @excerpt,
       category    = @category,
       image_url   = @image_url,
+      hero_url    = @hero_url,
       published   = @published,
       updated_at  = CURRENT_TIMESTAMP
     WHERE slug = @slug
@@ -55,31 +56,36 @@ const STMT = {
   del   : db.prepare(`DELETE FROM posts WHERE slug = ?`)
 };
 
-// --------------------------------------------------
-// public API
-// --------------------------------------------------
+/* ---------- tiny helper to avoid “missing parameter” ---------- */
+function fillDefaults (p){
+  if (p.image_url === undefined) p.image_url = '';
+  if (p.hero_url  === undefined) p.hero_url  = '';
+  return p;
+}
+
+/* ---------- public API ---------- */
 module.exports = {
-  /** @returns {array} all posts newest-first */
+  /** newest-first list */
   all () {
     return STMT.all.all();
   },
 
-  /** @param {string} slug */
+  /** single post by slug */
   find (slug) {
     return STMT.get.get(slug);
   },
 
-  /** @param {object} p – must contain slug,title,content_md,category,image_url,published */
+  /** insert new row */
   insert (p) {
-    STMT.insert.run(p);
+    STMT.insert.run(fillDefaults(p));
   },
 
-  /** @param {object} p – same keys as insert */
+  /** update existing row */
   update (p) {
-    STMT.update.run(p);
+    STMT.update.run(fillDefaults(p));
   },
 
-  /** @param {string} slug */
+  /** delete by slug */
   del (slug) {
     STMT.del.run(slug);
   }

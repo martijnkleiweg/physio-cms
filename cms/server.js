@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------
-   server.js – Physio CMS API + Admin UI  (single-image version)
+   server.js – Physio CMS API + Admin UI  (card + optional hero)
 ----------------------------------------------------------- */
 
 const express   = require('express');
@@ -17,17 +17,17 @@ const app = express();
 /* ---------- global middleware ---------- */
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // /uploads + admin assets
+app.use(express.static(path.join(__dirname, 'public')));   // /uploads + admin assets
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-/* ---------- upload config (tmp) ---------- */
+/* ---------- upload config (temp folder) ---------- */
 const tmpDir = path.join(__dirname, 'public/uploads/tmp');
 fs.mkdirSync(tmpDir, { recursive: true });
 const upload = multer({ dest: tmpDir });
 
 /* ===========================================================
-   PUBLIC API – consumed by front-end
+   PUBLIC API – consumed by the static front-end
 =========================================================== */
 app.get('/api/posts', (_ ,res) => res.json(db.all()));
 
@@ -47,8 +47,8 @@ app.use('/admin', basicAuth({
 }));
 
 /* ---------- editor UI ---------- */
-app.get('/admin',        (_ ,res) => res.render('editor', { post: null }));
-app.get('/admin/:slug',  (req,res) => {
+app.get('/admin',       (_ ,res) => res.render('editor', { post: null }));
+app.get('/admin/:slug', (req,res) => {
   const post = db.find(req.params.slug);
   if (!post) return res.redirect('/admin');
   res.render('editor', { post });
@@ -61,7 +61,8 @@ app.post('/admin/save', (req, res) => {
   const p = req.body;
   p.published = p.published ? 1 : 0;
   p.category  = p.category  || 'news';
-  p.image_url = p.image_url || '';      //  <-- guarantee param exists
+  p.image_url = p.image_url || '';
+  p.hero_url  = p.hero_url  || '';          // <── NEW
 
   if (db.find(p.slug)) db.update(p);
   else                 db.insert(p);
@@ -75,30 +76,39 @@ app.delete('/admin/:slug', (req,res) => {
 });
 
 /* ===========================================================
-   Image upload  (creates 1280×720 hero  & 400×250 card)
-   Returns a single URL  → front-end stores it in image_url
+   Image upload
+   • Accepts one file
+   • Creates 1280×720  -hero.jpg  & 400×250  -card.jpg
+   • Responds with      { basename, hero, card }
 =========================================================== */
 app.post('/admin/upload', upload.single('file'), async (req, res) => {
   try {
-    const srcPath   = req.file.path;
-    const outDir    = path.join(__dirname, 'public/uploads');
-    const basename  = Date.now().toString();          // unique ID
+    const srcPath  = req.file.path;
+    const outDir   = path.join(__dirname, 'public/uploads');
+    const basename = Date.now().toString();               // unique ID
 
-    // 1280×720 hero (kept for possible future use)
+    /* hero 1280×720 */
+    const heroName = `${basename}-hero.jpg`;
     await sharp(srcPath)
       .resize(1280, 720, { fit:'cover' })
       .jpeg({ quality:80 })
-      .toFile(path.join(outDir, `${basename}-hero.jpg`));
+      .toFile(path.join(outDir, heroName));
 
-    // 400×250 card – this is what the site actually displays
-    const cardName  = `${basename}-card.jpg`;
+    /* card 400×250 */
+    const cardName = `${basename}-card.jpg`;
     await sharp(srcPath)
       .resize(400, 250, { fit:'cover' })
       .jpeg({ quality:80 })
       .toFile(path.join(outDir, cardName));
 
-    fs.unlinkSync(srcPath);                          // remove temp upload
-    res.json({ url:`/uploads/${cardName}` });        // editor uses this directly
+    fs.unlinkSync(srcPath);                               // delete temp upload
+
+    // Editor JS can build URLs from hero/card …or just use the helpers here
+    res.json({
+      basename,
+      hero : `/uploads/${heroName}`,
+      card : `/uploads/${cardName}`
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error:'Image processing failed' });
