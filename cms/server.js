@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------
-   server.js – Physio CMS API + Admin UI  (card + optional hero)
+   server.js – Physio CMS  (card + optional hero image)
 ----------------------------------------------------------- */
 
 const express   = require('express');
@@ -17,7 +17,7 @@ const app = express();
 /* ---------- global middleware ---------- */
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));   // /uploads + admin assets
+app.use(express.static(path.join(__dirname, 'public')));    // /uploads + admin assets
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -27,9 +27,9 @@ fs.mkdirSync(tmpDir, { recursive: true });
 const upload = multer({ dest: tmpDir });
 
 /* ===========================================================
-   PUBLIC API – consumed by the static front-end
+   PUBLIC API  – consumed by the static front‑end
 =========================================================== */
-app.get('/api/posts', (_ ,res) => res.json(db.all()));
+app.get('/api/posts', (_ , res) => res.json(db.all()));
 
 app.get('/api/posts/:slug', (req, res) => {
   const row = db.find(req.params.slug);
@@ -38,7 +38,7 @@ app.get('/api/posts/:slug', (req, res) => {
 });
 
 /* ===========================================================
-   Admin area guarded by Basic-Auth
+   Admin area (HTTP Basic auth)
 =========================================================== */
 app.use('/admin', basicAuth({
   users     : { editor: process.env.ADMIN_PW || 'ChangeMe123' },
@@ -62,7 +62,7 @@ app.post('/admin/save', (req, res) => {
   p.published = p.published ? 1 : 0;
   p.category  = p.category  || 'news';
   p.image_url = p.image_url || '';
-  p.hero_url  = p.hero_url  || '';          // <── NEW
+  p.hero_url  = p.hero_url  || '';     // ← NEW  (optional hero override)
 
   if (db.find(p.slug)) db.update(p);
   else                 db.insert(p);
@@ -76,34 +76,33 @@ app.delete('/admin/:slug', (req,res) => {
 });
 
 /* ===========================================================
-   Image upload
-   • Accepts one file
-   • Creates 1280×720  -hero.jpg  & 400×250  -card.jpg
-   • Responds with      { basename, hero, card }
+   Featured‑image upload
+   • Creates 1280 × 720  -hero.jpg   (quality 82)
+   • Creates  400 × 250  -card.jpg   (quality 80)
+   • Responds with  { basename, hero, card }
 =========================================================== */
 app.post('/admin/upload', upload.single('file'), async (req, res) => {
   try {
     const srcPath  = req.file.path;
     const outDir   = path.join(__dirname, 'public/uploads');
-    const basename = Date.now().toString();               // unique ID
+    const basename = Date.now().toString();                 // unique ID
 
-    /* hero 1280×720 */
+    /* hero */
     const heroName = `${basename}-hero.jpg`;
     await sharp(srcPath)
-      .resize(1280, 720, { fit:'cover' })
-      .jpeg({ quality:80 })
+      .resize(1280, 720, { fit: 'cover' })
+      .jpeg({ quality: 82 })
       .toFile(path.join(outDir, heroName));
 
-    /* card 400×250 */
+    /* card */
     const cardName = `${basename}-card.jpg`;
     await sharp(srcPath)
-      .resize(400, 250, { fit:'cover' })
-      .jpeg({ quality:80 })
+      .resize(400, 250, { fit: 'cover' })
+      .jpeg({ quality: 80 })
       .toFile(path.join(outDir, cardName));
 
-    fs.unlinkSync(srcPath);                               // delete temp upload
+    fs.unlinkSync(srcPath);                                 // purge tmp
 
-    // Editor JS can build URLs from hero/card …or just use the helpers here
     res.json({
       basename,
       hero : `/uploads/${heroName}`,
@@ -111,11 +110,11 @@ app.post('/admin/upload', upload.single('file'), async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error:'Image processing failed' });
+    res.status(500).json({ error: 'Image processing failed' });
   }
 });
 
-/* ---------- inline image for EasyMDE (optional) ---------- */
+/* ---------- inline image for EasyMDE ---------- */
 app.post('/admin/upload-inline', upload.single('file'), async (req,res) => {
   try {
     const srcPath  = req.file.path;
@@ -123,15 +122,15 @@ app.post('/admin/upload-inline', upload.single('file'), async (req,res) => {
     const name     = `${Date.now()}-body.jpg`;
 
     await sharp(srcPath)
-      .resize({ width:800 })
-      .jpeg({ quality:82 })
+      .resize({ width: 800 })
+      .jpeg({ quality: 82 })
       .toFile(path.join(outDir, name));
 
     fs.unlinkSync(srcPath);
-    res.json({ url:`/uploads/${name}` });
+    res.json({ url: `/uploads/${name}` });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error:'Inline upload failed' });
+    res.status(500).json({ error: 'Inline upload failed' });
   }
 });
 

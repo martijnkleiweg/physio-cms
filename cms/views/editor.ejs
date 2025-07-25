@@ -4,9 +4,13 @@
   <meta charset="utf-8">
   <title><%= post ? 'Edit' : 'New' %> Post</title>
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-  <style>.EasyMDEContainer{border-radius:.375rem;overflow:hidden;}</style>
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/easymde/dist/easymde.min.css"        rel="stylesheet">
+  <style>
+    .EasyMDEContainer{border-radius:.375rem;overflow:hidden}
+    img.preview     {max-width:220px;margin-top:.75rem}
+  </style>
 </head>
 <body class="container py-5">
 
@@ -15,74 +19,76 @@
   <!-- =========================  EDITOR FORM  ========================= -->
   <form id="postForm" class="vstack gap-4">
 
-    <!-- --- TITLE ---------------------------------------------------- -->
+    <!-- TITLE -->
     <div>
       <label class="form-label fw-semibold">Title</label>
-      <input class="form-control" name="title" placeholder="Article title"
-             value="<%= post ? post.title : '' %>" required>
+      <input class="form-control" name="title" required
+             placeholder="Article title"
+             value="<%= post?.title || '' %>">
     </div>
 
-    <!-- --- SLUG ----------------------------------------------------- -->
+    <!-- SLUG -->
     <div>
       <label class="form-label fw-semibold">Slug (URL)</label>
-      <input class="form-control" name="slug" placeholder="slug-my-post"
-             value="<%= post ? post.slug : '' %>" required pattern="^[a-z0-9-]+$">
-      <div class="form-text">Lower-case letters, numbers and dashes only.</div>
+      <input class="form-control" name="slug" required pattern="^[a-z0-9-]+$"
+             placeholder="slug-my-post"
+             value="<%= post?.slug || '' %>">
+      <div class="form-text">Lower‑case letters, numbers and dashes only.</div>
     </div>
 
-    <!-- --- CATEGORY ------------------------------------------------- -->
+    <!-- CATEGORY -->
     <div>
       <label class="form-label fw-semibold">Category</label>
-      <% const cat = post ? post.category : 'news'; %>
+      <% const cat = post?.category || 'news'; %>
       <select class="form-select" name="category">
-        <option value="news"    <%= cat==='news'    ? 'selected' : '' %>>News</option>
-        <option value="service" <%= cat==='service' ? 'selected' : '' %>>Service</option>
-        <option value="tips"    <%= cat==='tips'    ? 'selected' : '' %>>Tips</option>
+        <option value="news"    <%= cat==='news'    && 'selected' %>>News</option>
+        <option value="service" <%= cat==='service' && 'selected' %>>Service</option>
+        <option value="tips"    <%= cat==='tips'    && 'selected' %>>Tips</option>
       </select>
     </div>
 
-    <!-- --- MARKDOWN ------------------------------------------------- -->
+    <!-- MARKDOWN (EasyMDE) -->
     <div>
       <label class="form-label fw-semibold">Content (Markdown)</label>
-      <textarea id="editor" name="content_md"><%= post ? post.content_md : '' %></textarea>
+      <textarea id="editor" name="content_md"><%= post?.content_md || '' %></textarea>
     </div>
 
-    <!-- --- EXCERPT -------------------------------------------------- -->
+    <!-- EXCERPT -->
     <div>
       <label class="form-label fw-semibold">Excerpt (optional)</label>
-      <textarea class="form-control" rows="3" name="excerpt"
-                placeholder="Short summary shown on cards"><%= post ? post.excerpt : '' %></textarea>
+      <textarea class="form-control" name="excerpt" rows="3"
+                placeholder="Short summary shown on cards"><%= post?.excerpt || '' %></textarea>
     </div>
 
-    <!-- --- FEATURED / CARD IMAGE ----------------------------------- -->
+    <!-- CARD IMAGE -->
     <div>
-      <label class="form-label fw-semibold">Featured image (card)</label>
-      <input type="file" id="cardInput" accept="image/*" class="form-control">
-      <input type="hidden" name="image_url" value="<%= post ? post.image_url : '' %>">
-      <img id="cardPreview"
-           src="<%= post && post.image_url ? post.image_url : '' %>"
-           style="max-width:220px;<%= post && post.image_url ? '' : 'display:none' %>;margin-top:.75rem;">
+      <label class="form-label fw-semibold">Featured image (card 400 × 250)</label>
+      <input id="cardInput" type="file" accept="image/*" class="form-control">
+      <input type="hidden" name="image_url" value="<%= post?.image_url || '' %>">
+      <img id="cardPreview" class="preview"
+           src="<%= post?.image_url || '' %>"
+           style="<%= post?.image_url ? '' : 'display:none' %>">
     </div>
 
-    <!-- --- HERO IMAGE ---------------------------------------------- -->
+    <!-- HERO IMAGE -->
     <div>
-      <label class="form-label fw-semibold">Hero image (banner 1280×720)</label>
-      <input type="file" id="heroInput" accept="image/*" class="form-control">
-      <input type="hidden" name="hero_url" value="<%= post ? post.hero_url : '' %>">
-      <img id="heroPreview"
-           src="<%= post && post.hero_url ? post.hero_url : '' %>"
-           style="max-width:220px;<%= post && post.hero_url ? '' : 'display:none' %>;margin-top:.75rem;">
-      <div class="form-text">Optional. If omitted, banner falls back to the featured image.</div>
+      <label class="form-label fw-semibold">Hero image (banner 1280 × 720)</label>
+      <input id="heroInput" type="file" accept="image/*" class="form-control">
+      <input type="hidden" name="hero_url" value="<%= post?.hero_url || '' %>">
+      <img id="heroPreview" class="preview"
+           src="<%= post?.hero_url || '' %>"
+           style="<%= post?.hero_url ? '' : 'display:none' %>">
+      <div class="form-text">Optional. If empty, the banner falls back to the featured image.</div>
     </div>
 
-    <!-- --- PUBLISH SWITCH ------------------------------------------ -->
+    <!-- PUBLISH SWITCH -->
     <div class="form-check form-switch">
-      <input class="form-check-input" type="checkbox" name="published" value="1"
-             id="pubSwitch" <%= post && post.published ? 'checked' : '' %>>
-      <label class="form-check-label fw-semibold" for="pubSwitch">Published</label>
+      <input class="form-check-input" type="checkbox" id="pubSwitch"
+             name="published" value="1" <%= post?.published ? 'checked' : '' %>>
+      <label for="pubSwitch" class="form-check-label fw-semibold">Published</label>
     </div>
 
-    <!-- --- BUTTONS -------------------------------------------------- -->
+    <!-- BUTTONS -->
     <div>
       <button class="btn btn-primary">Save</button>
       <% if (post) { %>
@@ -91,91 +97,84 @@
     </div>
   </form>
 
-  <!-- =========================  LIST OF POSTS  ========================= -->
+  <!-- =========================  POST LIST  ========================== -->
   <hr class="my-5">
   <h2 class="mb-3">All Posts</h2>
   <ul id="postList" class="list-group"></ul>
 
-  <!-- =========================  SCRIPTS  ========================= -->
+  <!-- =========================  SCRIPTS  ============================ -->
   <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
   <script type="module">
     /* ---------- EasyMDE ---------- */
     const easyMDE = new EasyMDE({
-      element      : document.getElementById('editor'),
-      spellChecker : false,
-      status       : false,
-      placeholder  : 'Start writing…'
+      element     : document.getElementById('editor'),
+      spellChecker: false,
+      status      : false,
+      placeholder : 'Start writing…'
     });
 
-    const qs = s => document.querySelector(s);
+    const qs = sel => document.querySelector(sel);
 
-    /* ---------- Save ---------- */
-    qs('#postForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      qs('[name="content_md"]').value = easyMDE.value();  // sync
-      const data = Object.fromEntries(new FormData(e.target));
+    /* ---------- helper: upload & resize on server ---------- */
+    async function uploadAndGetURLs(file){
+      const fd = new FormData(); fd.append('file', file);
+      const r  = await fetch('/admin/upload', { method:'POST', body: fd });
+      if(!r.ok) throw new Error('Upload failed');
+      return await r.json();                  // { basename, hero, card }
+    }
+
+    /* ---------- CARD image ---------- */
+    qs('#cardInput')?.addEventListener('change', async e=>{
+      const file = e.target.files?.[0]; if(!file) return;
+      try{
+        const { card } = await uploadAndGetURLs(file);
+        qs('[name=image_url]').value = card;
+        const prev = qs('#cardPreview'); prev.src = card; prev.style.display='';
+      }catch(err){ alert(err.message); }
+    });
+
+    /* ---------- HERO image ---------- */
+    qs('#heroInput')?.addEventListener('change', async e=>{
+      const file = e.target.files?.[0]; if(!file) return;
+      try{
+        const { hero } = await uploadAndGetURLs(file);
+        qs('[name=hero_url]').value = hero;
+        const prev = qs('#heroPreview'); prev.src = hero; prev.style.display='';
+      }catch(err){ alert(err.message); }
+    });
+
+    /* ---------- SAVE ---------- */
+    qs('#postForm').addEventListener('submit', async ev=>{
+      ev.preventDefault();
+      qs('[name=content_md]').value = easyMDE.value();          // sync editor
+      const data = Object.fromEntries(new FormData(ev.target));
       data.published = data.published ? 1 : 0;
 
       const r = await fetch('/admin/save', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(data)
+        method :'POST',
+        headers:{'Content-Type':'application/json'},
+        body   : JSON.stringify(data)
       });
-      if (r.ok) { alert('Saved ✔︎'); location.reload(); } else { alert('Error'); }
+      if(r.ok){ alert('Saved ✔︎'); location.reload(); }
+      else     { alert('Save failed'); }
     });
 
-    /* ---------- Delete ---------- */
+    /* ---------- DELETE ---------- */
     <% if (post) { %>
-    qs('#deleteBtn')?.addEventListener('click', async () => {
-      if (!confirm('Delete this post?')) return;
+    qs('#deleteBtn')?.addEventListener('click', async ()=>{
+      if(!confirm('Delete this post?')) return;
       await fetch('/admin/<%= post.slug %>', { method:'DELETE' });
       location.href = '/admin';
     });
     <% } %>
 
-    /* ---------- Upload helper ---------- */
-    async function doUpload(file){
-      const fd = new FormData(); fd.append('file', file);
-      const r  = await fetch('/admin/upload', { method:'POST', body:fd });
-      if (!r.ok) throw new Error('upload failed');
-      return await r.json();                 // { basename, hero, card }
-    }
-
-    /* ---------- CARD upload ---------- */
-    const cardInput   = qs('#cardInput');
-    const cardPreview = qs('#cardPreview');
-    cardInput?.addEventListener('change', async () => {
-      if (!cardInput.files.length) return;
-      try{
-        const { card } = await doUpload(cardInput.files[0]);
-        qs('[name=image_url]').value = card;
-        cardPreview.src   = card;
-        cardPreview.style.display = 'block';
-      }catch(err){ alert(err.message); }
-    });
-
-    /* ---------- HERO upload ---------- */
-    const heroInput   = qs('#heroInput');
-    const heroPreview = qs('#heroPreview');
-    heroInput?.addEventListener('change', async () => {
-      if (!heroInput.files.length) return;
-      try{
-        const { hero } = await doUpload(heroInput.files[0]);
-        qs('[name=hero_url]').value = hero;
-        heroPreview.src   = hero;
-        heroPreview.style.display = 'block';
-      }catch(err){ alert(err.message); }
-    });
-
-    /* ---------- List ---------- */
+    /* ---------- LIST OF POSTS ---------- */
     async function loadList(){
-      const r   = await fetch('/api/posts');
-      const all = await r.json();
-      qs('#postList').innerHTML = all.map(p=>`
+      const r = await fetch('/api/posts'); const posts = await r.json();
+      qs('#postList').innerHTML = posts.map(p=>`
         <li class="list-group-item d-flex justify-content-between align-items-center">
           <a href="/admin/${p.slug}">${p.title}</a>
-          <span class="badge bg-${p.published?'success':'secondary'}">
-            ${p.published?'live':'draft'}
-          </span>
+          <span class="badge bg-${p.published?'success':'secondary'}">${p.published?'live':'draft'}</span>
         </li>`).join('');
     }
     loadList();
