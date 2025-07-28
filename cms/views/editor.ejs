@@ -79,6 +79,27 @@
     <div class="form-text">Optional. If omitted, banner falls back to the featured image.</div>
   </div>
 
+  <!-- ───── ADDED: HERO ALIGNMENT (hero_pos) ───────────────────── -->
+  <div>
+    <label class="form-label fw-semibold d-block">Hero image vertical focus</label>
+    <% const heroPos = (post && post.hero_pos) ? post.hero_pos : 'center'; %>
+    <div class="btn-group" role="group" aria-label="Hero position">
+      <input type="radio" class="btn-check" name="hero_pos" id="posTop" value="top"
+             <%= heroPos === 'top' ? 'checked' : '' %>>
+      <label class="btn btn-outline-secondary" for="posTop">Top</label>
+
+      <input type="radio" class="btn-check" name="hero_pos" id="posCenter" value="center"
+             <%= heroPos === 'center' ? 'checked' : '' %>>
+      <label class="btn btn-outline-secondary" for="posCenter">Center</label>
+
+      <input type="radio" class="btn-check" name="hero_pos" id="posBottom" value="bottom"
+             <%= heroPos === 'bottom' ? 'checked' : '' %>>
+      <label class="btn btn-outline-secondary" for="posBottom">Bottom</label>
+    </div>
+    <div class="form-text">Controls which part of the image stays in view on tall/narrow screens.</div>
+  </div>
+  <!-- ──── /ADDED ──────────────────────────────────────────────── -->
+
   <!-- ───── PUBLISH SWITCH ─────────────────────────────────────── -->
   <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox"
@@ -185,6 +206,8 @@
     qs('[name="content_md"]').value = easyMDE.value();
     const data = Object.fromEntries(new FormData(e.target));
     data.published = data.published ? 1 : 0;
+    data.featured  = data.featured  ? 1 : 0;
+    if (!data.hero_pos) data.hero_pos = 'center';   // ensure default
 
     const r = await fetch('/admin/save',{
       method : 'POST',

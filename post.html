@@ -16,7 +16,7 @@
     .hero-banner{
       height:45vh;
       background-size:cover;
-      background-position: top center; /* <- keep faces in frame */
+      background-position: top center;        /* default */
       background-repeat:no-repeat;
       position:relative;
     }
@@ -27,11 +27,10 @@
       z-index:1;pointer-events:none;
     }
     .hero-banner .container{position:relative;z-index:2;}
-    .hero-banner .overlay{display:none;} /* remove dark overlay */
+    .hero-banner .overlay{display:none;}     /* remove dark overlay */
   </style>
 </head>
 <body>
-
   <!-- ===== TOP BAR ==================================================== -->
   <div class="top-bar text-white py-2">
     <div class="container d-flex justify-content-between">
@@ -141,6 +140,13 @@
           : deriveHeroFromCard(post.image_url) || post.image_url || '';
 
         if (hero) qs('#heroBanner').style.backgroundImage = `url('${hero}')`;
+
+        // ADDED: honour hero_pos (top / center / bottom) -->
+        const posMap = { top:'top center', center:'center center', bottom:'bottom center' };
+        if (post.hero_pos && posMap[post.hero_pos]){
+          qs('#heroBanner').style.backgroundPosition = posMap[post.hero_pos];
+        }
+        // /ADDED -->
 
         // Body
         qs('#articleContent').innerHTML = post.content_html;

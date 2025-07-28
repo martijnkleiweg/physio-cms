@@ -1,6 +1,11 @@
 /* -----------------------------------------------------------
    db.js – SQLite wrapper for Physio CMS
-   Adds hero_url (1280×720 banner) alongside image_url (card).
+   Fields:
+     - image_url (card image URL)
+     - hero_url  (1280×720 banner URL)
+     - hero_pos  ('top' | 'center' | 'bottom') – vertical focus for hero
+     - featured  (0/1)
+     - published (0/1)
 ----------------------------------------------------------- */
 const path     = require('path');
 const Database = require('better-sqlite3');
@@ -9,7 +14,7 @@ const Database = require('better-sqlite3');
 const dbPath = path.join(__dirname, 'data', 'physio.sqlite');
 const db     = new Database(dbPath);
 
-/* ---------- ensure table exists / evolved ---------- */
+/* ---------- ensure table exists ---------- */
 db.exec(`
 CREATE TABLE IF NOT EXISTS posts (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,12 +25,29 @@ CREATE TABLE IF NOT EXISTS posts (
   category    TEXT DEFAULT 'news',
   image_url   TEXT DEFAULT '',
   hero_url    TEXT DEFAULT '',
+  hero_pos    TEXT DEFAULT 'center',
   featured    INTEGER DEFAULT 0,
   published   INTEGER DEFAULT 0,
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 `);
+
+/* ---------- lightweight auto-migrations (idempotent) ---------- */
+function addColumnIfMissing(sql) {
+  try { db.exec(sql); }
+  catch (e) {
+    // Ignore "duplicate column name" errors; rethrow anything else
+    if (!/duplicate column name/i.test(e.message)) throw e;
+  }
+}
+
+// Ensure columns exist even if table was created before these fields
+addColumnIfMissing(`ALTER TABLE posts ADD COLUMN image_url TEXT DEFAULT ''`);
+addColumnIfMissing(`ALTER TABLE posts ADD COLUMN hero_url  TEXT DEFAULT ''`);
+addColumnIfMissing(`ALTER TABLE posts ADD COLUMN hero_pos  TEXT DEFAULT 'center'`);
+addColumnIfMissing(`ALTER TABLE posts ADD COLUMN featured  INTEGER DEFAULT 0`);
+addColumnIfMissing(`ALTER TABLE posts ADD COLUMN published INTEGER DEFAULT 0`);
 
 /* ---------- prepared statements ---------- */
 const STMT = {
@@ -35,10 +57,10 @@ const STMT = {
   insert: db.prepare(`
     INSERT INTO posts
       (title, slug, content_md, excerpt, category,
-       image_url, hero_url, featured, published)
+       image_url, hero_url, hero_pos, featured, published)
     VALUES
       (@title, @slug, @content_md, @excerpt, @category,
-       @image_url, @hero_url, @featured, @published)
+       @image_url, @hero_url, @hero_pos, @featured, @published)
   `),
 
   update: db.prepare(`
@@ -49,6 +71,7 @@ const STMT = {
       category    = @category,
       image_url   = @image_url,
       hero_url    = @hero_url,
+      hero_pos    = @hero_pos,
       featured    = @featured,
       published   = @published,
       updated_at  = CURRENT_TIMESTAMP
@@ -62,6 +85,14 @@ const STMT = {
 function fillDefaults (p){
   if (p.image_url === undefined) p.image_url = '';
   if (p.hero_url  === undefined) p.hero_url  = '';
+  if (p.hero_pos  === undefined) p.hero_pos  = 'center';
+  if (p.featured  === undefined) p.featured  = 0;
+  if (p.published === undefined) p.published = 0;
+
+  // normalize values
+  p.featured  = p.featured ? 1 : 0;
+  p.published = p.published ? 1 : 0;
+  if (!['top','center','bottom'].includes(p.hero_pos)) p.hero_pos = 'center';
   return p;
 }
 
