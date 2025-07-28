@@ -131,20 +131,35 @@
       </div>`;
   }
 
-  /* ------------ render Services & Latest News ------------ */
+  function pickHomepage(posts, cat, n=3){
+    const inCat    = posts.filter(p => p.category === cat && p.published);
+    const featured = inCat
+      .filter(p => p.featured)
+      .sort((a,b)=> new Date(b.updated_at) - new Date(a.updated_at))
+      .slice(0, n);
+    if (featured.length >= n) return featured;
+
+    const remainder = inCat
+      .filter(p => !p.featured)
+      .sort((a,b)=> new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, n - featured.length);
+
+    return [...featured, ...remainder];
+  }
+
   (async () => {
     const posts = await getPosts();
 
+    const services = pickHomepage(posts, 'service', 3);
+    const news     = pickHomepage(posts, 'news', 3);
+
     document.getElementById('servicesRow').innerHTML =
-      posts.filter(p => p.category === 'service').map(card).join('') ||
-      '<p class="text-muted">Services coming soon.</p>';
+      services.map(card).join('') || '<p class="text-muted">Services coming soon.</p>';
 
     document.getElementById('newsRow').innerHTML =
-      posts.filter(p => p.category === 'news')
-           .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
-           .slice(0,3).map(card).join('') ||
-      '<p class="text-muted">No news yet.</p>';
+      news.map(card).join('') || '<p class="text-muted">No news yet.</p>';
   })();
+
 </script>
 </body>
 </html>
