@@ -60,6 +60,7 @@ app.get('/admin/:slug', (req,res) => {
 app.post('/admin/save', (req, res) => {
   const p = req.body;
   p.published = p.published ? 1 : 0;
+  p.featured  = p.featured  ? 1 : 0; 
   p.category  = p.category  || 'news';
   p.image_url = p.image_url || '';
   p.hero_url  = p.hero_url  || '';     // ← NEW  (optional hero override)

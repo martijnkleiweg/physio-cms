@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS posts (
   category    TEXT DEFAULT 'news',
   image_url   TEXT DEFAULT '',
   hero_url    TEXT DEFAULT '',
+  featured    INTEGER DEFAULT 0,
   published   INTEGER DEFAULT 0,
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -34,10 +35,10 @@ const STMT = {
   insert: db.prepare(`
     INSERT INTO posts
       (title, slug, content_md, excerpt, category,
-       image_url, hero_url, published)
+       image_url, hero_url, featured, published)
     VALUES
       (@title, @slug, @content_md, @excerpt, @category,
-       @image_url, @hero_url, @published)
+       @image_url, @hero_url, @featured, @published)
   `),
 
   update: db.prepare(`
@@ -48,6 +49,7 @@ const STMT = {
       category    = @category,
       image_url   = @image_url,
       hero_url    = @hero_url,
+      featured    = @featured,
       published   = @published,
       updated_at  = CURRENT_TIMESTAMP
     WHERE slug = @slug
