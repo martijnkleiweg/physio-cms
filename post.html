@@ -29,6 +29,22 @@
     .hero-banner .container{position:relative;z-index:2;}
     .hero-banner .overlay{display:none;}     /* remove dark overlay */
   </style>
+
+  <!-- Defaults that JS will overwrite -->
+  <meta name="description" content="">
+  <link rel="canonical" href="/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="">
+  <meta property="og:description" content="">
+  <meta property="og:url" content="/">
+  <meta property="og:site_name" content="Physio Therapy">
+  <meta property="og:image" content="">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="720">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="">
 </head>
 <body>
   <!-- ===== TOP BAR ==================================================== -->
@@ -94,13 +110,19 @@
   <header id="heroBanner" class="hero-banner">
     <div class="overlay"></div>
     <div class="container h-100 d-flex align-items-end">
-      <h1 id="heroTitle" class="mb-4 display-5 text-dark"></h1>
+      <!-- Mark headline for microdata -->
+      <h1 id="heroTitle" class="mb-4 display-5 text-dark" itemprop="headline"></h1>
     </div>
   </header>
 
   <!-- ===== ARTICLE BODY ============================================= -->
   <main class="container py-5">
-    <article id="articleContent"></article>
+    <!-- Schema.org Article wrapper -->
+    <article id="articleContent" itemscope itemtype="https://schema.org/Article" itemprop="articleBody"></article>
+
+    <!-- Hidden times for microdata (filled by JS) -->
+    <time id="publishedTime" itemprop="datePublished" datetime="" hidden></time>
+    <time id="modifiedTime"  itemprop="dateModified"  datetime="" hidden></time>
   </main>
 
   <!-- ===== FOOTER / BACK-TO-TOP ===================================== -->
@@ -117,11 +139,60 @@
     const slug = new URLSearchParams(location.search).get('slug');
     if (!slug) location.href = '/';
 
-    // Given a card URL, try to produce the matching hero URL
+    const SITE_NAME = 'Physio Therapy';
+    const CAT_LABELS = {
+      news    : 'News',
+      service : 'Services',
+      tips    : 'Tips'
+    };
+
+    // Replace "-card.<ext>" with "-hero.<ext>" if possible
     function deriveHeroFromCard(url){
       if (!url) return '';
-      // replace "-card.<ext>" with "-hero.<ext>"
       return url.replace(/-card(\.(jpe?g|png|webp|avif))$/i, '-hero$1');
+    }
+
+    // SEO helpers
+    function setMeta(name, content){
+      if (!content) return;
+      let el = document.querySelector(`meta[name="${name}"]`);
+      if (!el){ el = document.createElement('meta'); el.setAttribute('name', name); document.head.appendChild(el); }
+      el.setAttribute('content', content);
+    }
+    function setOG(prop, content){
+      if (!content) return;
+      let el = document.querySelector(`meta[property="${prop}"]`);
+      if (!el){ el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+      el.setAttribute('content', content);
+    }
+    function setCanonical(href){
+      if (!href) return;
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link){ link = document.createElement('link'); link.setAttribute('rel','canonical'); document.head.appendChild(link); }
+      link.setAttribute('href', href);
+    }
+    function ensureRobots(content){
+      let el = document.querySelector('meta[name="robots"]');
+      if (!el){ el = document.createElement('meta'); el.setAttribute('name','robots'); document.head.appendChild(el); }
+      el.setAttribute('content', content);
+    }
+    function textFromHTML(html){
+      const div = document.createElement('div');
+      div.innerHTML = html || '';
+      return div.textContent || div.innerText || '';
+    }
+    function summarize(text, max=160){
+      const t = (text || '').replace(/\s+/g,' ').trim();
+      if (t.length <= max) return t;
+      const cut = t.slice(0, max);
+      const lastSpace = cut.lastIndexOf(' ');
+      return (lastSpace > 60 ? cut.slice(0, lastSpace) : cut).trim() + '…';
+    }
+    function iso(dt){
+      if (!dt) return '';
+      // handle "YYYY-MM-DD HH:MM:SS" from SQLite
+      const d = new Date(dt.replace(' ', 'T'));
+      return isNaN(d) ? '' : d.toISOString();
     }
 
     (async () => {
@@ -130,32 +201,129 @@
         if (!r.ok) throw new Error('404');
         const post = await r.json();
 
-        // Title
-        document.title = `${post.title} – Physio Therapy`;
+        // Title & headline
+        document.title = `${post.title} – ${SITE_NAME}`;
         qs('#heroTitle').textContent = post.title;
 
-        // Choose hero: explicit hero_url -> derived hero from image_url -> image_url as-is
+        // Choose hero: explicit hero_url -> derived hero -> image_url as-is
         let hero = (post.hero_url && post.hero_url.trim())
           ? post.hero_url
           : deriveHeroFromCard(post.image_url) || post.image_url || '';
 
-        if (hero) qs('#heroBanner').style.backgroundImage = `url('${hero}')`;
+        if (hero) {
+          qs('#heroBanner').style.backgroundImage = `url('${hero}')`;
+          // Preload hero for perceived speed
+          const preload = document.createElement('link');
+          preload.rel = 'preload';
+          preload.as  = 'image';
+          preload.href= hero.startsWith('http') ? hero : (location.origin + hero);
+          document.head.appendChild(preload);
+        }
 
-        // ADDED: honour hero_pos (top / center / bottom) -->
+        // Honour hero_pos (top / center / bottom)
         const posMap = { top:'top center', center:'center center', bottom:'bottom center' };
         if (post.hero_pos && posMap[post.hero_pos]){
           qs('#heroBanner').style.backgroundPosition = posMap[post.hero_pos];
         }
-        // /ADDED -->
 
         // Body
-        qs('#articleContent').innerHTML = post.content_html;
+        qs('#articleContent').innerHTML = post.content_html || '';
+        // Microdata times
+        const pubISO = iso(post.created_at);
+        const modISO = iso(post.updated_at || post.created_at);
+        if (pubISO) qs('#publishedTime').setAttribute('datetime', pubISO);
+        if (modISO) qs('#modifiedTime').setAttribute('datetime',  modISO);
+
+        /* ===================== SEO ===================== */
+        const canonical = (() => {
+          const url = new URL(location.href);
+          // keep only the slug param to avoid junk params being canonicalized
+          [...url.searchParams.keys()].forEach(k => { if (k !== 'slug') url.searchParams.delete(k); });
+          return url.toString();
+        })();
+
+        const absHero = hero
+          ? (hero.startsWith('http') ? hero : (location.origin + hero))
+          : '';
+
+        const description = summarize(post.excerpt || textFromHTML(post.content_html), 160);
+        const catTitle = CAT_LABELS[(post.category || '').toLowerCase()] || (post.category || 'Article');
+
+        setMeta('description', description);
+        setCanonical(canonical);
+
+        // Indexing: noindex drafts
+        if (!post.published) ensureRobots('noindex, nofollow');
+        else ensureRobots('index, follow');
+
+        // Open Graph
+        setOG('og:title',       post.title + ' – ' + SITE_NAME);
+        setOG('og:description', description);
+        setOG('og:url',         canonical);
+        setOG('og:site_name',   SITE_NAME);
+        setOG('og:type',        'article');
+        if (absHero) {
+          setOG('og:image', absHero);
+          setOG('og:image:width',  '1280');
+          setOG('og:image:height', '720');
+        }
+        setOG('article:section', catTitle);
+        if (pubISO) setOG('article:published_time', pubISO);
+        if (modISO) setOG('article:modified_time',  modISO);
+
+        // Twitter Card
+        setMeta('twitter:card',        'summary_large_image');
+        setMeta('twitter:title',       post.title + ' – ' + SITE_NAME);
+        setMeta('twitter:description', description);
+        if (absHero) setMeta('twitter:image', absHero);
+
+        // JSON‑LD: Article
+        const articleLD = {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": post.title,
+          "image": absHero || undefined,
+          "datePublished": pubISO || undefined,
+          "dateModified":  modISO || undefined,
+          "articleSection": catTitle,
+          "mainEntityOfPage": { "@type":"WebPage", "@id": canonical },
+          "author": { "@type":"Organization", "name": SITE_NAME },
+          "publisher": {
+            "@type":"Organization",
+            "name": SITE_NAME,
+            "logo": { "@type":"ImageObject", "url": location.origin + "/images/logo.png" }
+          },
+          "description": description
+        };
+        const ld1 = document.createElement('script');
+        ld1.type = 'application/ld+json';
+        ld1.textContent = JSON.stringify(articleLD);
+        document.head.appendChild(ld1);
+
+        // JSON‑LD: BreadcrumbList
+        const catParam = (post.category || 'news').toLowerCase();
+        const breadcrumbLD = {
+          "@context":"https://schema.org",
+          "@type":"BreadcrumbList",
+          "itemListElement":[
+            { "@type":"ListItem", "position":1, "name":"Home", "item": location.origin + "/" },
+            { "@type":"ListItem", "position":2, "name": catTitle,
+              "item": location.origin + "/category.html?category=" + encodeURIComponent(catParam) },
+            { "@type":"ListItem", "position":3, "name": post.title, "item": canonical }
+          ]
+        };
+        const ld2 = document.createElement('script');
+        ld2.type = 'application/ld+json';
+        ld2.textContent = JSON.stringify(breadcrumbLD);
+        document.head.appendChild(ld2);
+        /* =================== /SEO ====================== */
 
       } catch (err) {
         console.error(err);
         qs('#heroTitle').textContent = 'Article not found';
         qs('#articleContent').innerHTML =
           '<p class="text-danger">Sorry, this article could not be loaded.</p>';
+        ensureRobots('noindex, nofollow');
       }
     })();
   </script>
