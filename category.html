@@ -18,6 +18,7 @@
       border-bottom:1px solid #eef2f7;
     }
     .breadcrumb a { text-decoration:none; }
+
     /* Card image with consistent ratio & cover crop */
     .card-img-wrap {
       position:relative;
@@ -38,21 +39,17 @@
 
     /* Black, non-underlined headings on cards */
     .card-title a {
-      color: #212529;            /* Bootstrap's text-dark */
-      text-decoration: none;
+      color:#212529;            /* Bootstrap text-dark */
+      text-decoration:none;
     }
-
     .card-title a:hover,
     .card-title a:focus {
-      text-decoration: underline; /* <- or keep none if you prefer absolutely no underline */
+      text-decoration:none;     /* no underline on hover/focus */
     }
-
-    /* Accessible keyboard focus without changing color */
     .card-title a:focus-visible {
-      outline: 2px solid #0d6efd; /* Bootstrap primary */
-      outline-offset: 2px;
+      outline:2px solid #0d6efd; /* accessible keyboard focus */
+      outline-offset:2px;
     }
-
   </style>
 
   <!-- Default SEO (will be overwritten dynamically for crawlers that parse JS) -->
@@ -179,6 +176,9 @@
       tips    : { title: 'Tips',    desc: 'Advice to stay active and healthy.' }
     };
 
+    // Show dates on cards? (No for Services)
+    const showDates = cat !== 'service';
+
     function formatDate(iso){ try {
       return new Date(iso.replace(' ', 'T')).toLocaleDateString(undefined,
         { year:'numeric', month:'short', day:'numeric' });
@@ -189,8 +189,7 @@
       if (!withPage) {
         url.searchParams.delete('page');
       } else {
-        // keep current page param
-        if (page === 1) url.searchParams.delete('page'); // avoid ?page=1 as canonical
+        if (page === 1) url.searchParams.delete('page');
       }
       return url.toString();
     }
@@ -206,10 +205,7 @@
       setOG('og:description', desc);
       setOG('og:url', buildCanonical());
 
-      // canonical
       setCanonical(buildCanonical(true));
-
-      // also expose an alternate canonical without ?page for page 1
       if (page === 1) setCanonical(buildCanonical(false));
     }
 
@@ -235,6 +231,13 @@
         <div class="card-img-wrap">
           <img src="${p.image_url}" alt="${p.title}" loading="lazy">
         </div>` : '';
+
+      const dateHtml = (showDates && p.created_at)
+        ? `<div class="post-meta mb-2">
+             <time datetime="${p.created_at}" itemprop="datePublished">${formatDate(p.created_at)}</time>
+           </div>`
+        : '';
+
       return `
         <div class="col-md-6 col-lg-4">
           <article class="card h-100" itemscope itemtype="https://schema.org/Article">
@@ -243,9 +246,7 @@
               <h2 class="h5 card-title mb-2" itemprop="headline">
                 <a href="post.html?slug=${encodeURIComponent(p.slug)}" class="stretched-link" itemprop="url">${p.title}</a>
               </h2>
-              <div class="post-meta mb-2">
-                <time datetime="${p.created_at}" itemprop="datePublished">${formatDate(p.created_at)}</time>
-              </div>
+              ${dateHtml}
               <p class="card-text flex-grow-1" itemprop="description">${p.excerpt ?? ''}</p>
             </div>
           </article>
@@ -322,7 +323,7 @@
         const all = (await r.json())
           .filter(p => p.published && (p.category || 'news').toLowerCase() === cat);
 
-        // Sort: show featured first, then newest
+        // Sort: featured first, then newest
         all.sort((a,b) => (b.featured||0) - (a.featured||0) || new Date(b.created_at) - new Date(a.created_at));
 
         // Pagination slice
