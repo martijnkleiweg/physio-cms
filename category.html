@@ -2,16 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Articles – Physio Therapy</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Category – Physio Therapy</title>
 
   <!-- Fonts & CSS -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/styles3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+
+  <!-- Page styles -->
+  <style>
+    .category-hero {
+      background:#f8fafc;
+      border-bottom:1px solid #eef2f7;
+    }
+    .breadcrumb a { text-decoration:none; }
+    /* Card image with consistent ratio & cover crop */
+    .card-img-wrap {
+      position:relative;
+      width:100%;
+      padding-top:62.5%;              /* 16:10 ratio ≈ card layout */
+      overflow:hidden;
+      background:#f0f0f0;
+      border-top-left-radius:.5rem;   /* match .card rounding */
+      border-top-right-radius:.5rem;
+    }
+    .card-img-wrap img {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover; object-position:center;
+    }
+    .post-meta { font-size:.9rem; color:#6c757d; }
+    .pagination .page-link { border-radius:.5rem; }
+  </style>
+
+  <!-- Default SEO (will be overwritten dynamically for crawlers that parse JS) -->
+  <meta name="description" content="Browse articles by category from Physio Therapy.">
+  <link rel="canonical" href="/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Category – Physio Therapy">
+  <meta property="og:description" content="Browse articles by category from Physio Therapy.">
+  <meta property="og:url" content="/">
 </head>
 <body>
+
   <!-- ===== TOP BAR ==================================================== -->
   <div class="top-bar text-white py-2">
     <div class="container d-flex justify-content-between">
@@ -53,7 +88,7 @@
     </div>
   </header>
 
-  <!-- ===== MOBILE OFF-CANVAS ========================================= -->
+  <!-- ===== MOBILE OFF-CANVAS MENU ==================================== -->
   <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="mobileMenuLabel">Menu</h5>
@@ -71,88 +106,222 @@
     </div>
   </div>
 
-  <!-- ===== PAGE HEADER =============================================== -->
-  <section class="py-5 bg-light">
-    <div class="container d-flex align-items-center justify-content-between">
-      <div>
-        <h1 id="pageTitle" class="mb-1">Articles</h1>
-        <p id="pageSub" class="text-muted mb-0"></p>
-      </div>
-      <a href="/" class="btn btn-outline-secondary">← Home</a>
+  <!-- ===== CATEGORY HERO / BREADCRUMBS =============================== -->
+  <section class="category-hero py-4">
+    <div class="container">
+      <!-- Breadcrumbs (with Schema.org microdata) -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2" itemscope itemtype="https://schema.org/BreadcrumbList">
+          <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a href="/" itemprop="item"><span itemprop="name">Home</span></a>
+            <meta itemprop="position" content="1">
+          </li>
+          <li class="breadcrumb-item active" aria-current="page"
+              itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <span itemprop="name" id="crumbCategory">Category</span>
+            <meta itemprop="position" content="2">
+          </li>
+        </ol>
+      </nav>
+
+      <h1 id="categoryTitle" class="mb-2">Category</h1>
+      <p id="categoryDesc" class="text-muted mb-0">Latest posts and updates in this category.</p>
     </div>
   </section>
 
-  <!-- ===== GRID ======================================================= -->
+  <!-- ===== LISTING ==================================================== -->
   <main class="container py-5">
-    <div id="cardsRow" class="row g-4"></div>
+    <div class="row g-4" id="grid"></div>
 
-    <!-- Load more (client-side pagination) -->
-    <div class="text-center mt-4">
-      <button id="loadMoreBtn" class="btn btn-outline-primary d-none">Load more</button>
-    </div>
+    <!-- Pagination -->
+    <nav class="d-flex justify-content-center mt-4" aria-label="Pagination">
+      <ul class="pagination" id="pager"></ul>
+    </nav>
   </main>
 
   <!-- ===== FOOTER ===================================================== -->
+  <a href="#" class="back-to-top"><i class="bi bi-arrow-up-circle-fill"></i></a>
   <footer class="bg-dark text-white py-3 text-center">
     <p>© 2024 Physio Therapy. All rights reserved.</p>
   </footer>
 
+  <!-- ===== JS ========================================================= -->
   <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    const qs = s => document.querySelector(s);
+    /* -------------------- helpers -------------------- */
+    const qs   = s => document.querySelector(s);
+    const qps  = new URLSearchParams(location.search);
+    const cat  = (qps.get('category') || 'news').toLowerCase();
+    const page = Math.max(1, parseInt(qps.get('page') || '1', 10));
+    const per  = 9; // posts per page
 
-    // --- read ?category=news|service|tips (fallback to news) ----------
-    const params   = new URLSearchParams(location.search);
-    const category = (params.get('category') || 'news').toLowerCase();
+    const CAT_LABELS = {
+      news    : { title: 'News',    desc: 'Updates and announcements from our clinic.' },
+      service : { title: 'Services',desc: 'Treatments and programs we provide.' },
+      tips    : { title: 'Tips',    desc: 'Advice to stay active and healthy.' }
+    };
 
-    const niceName = {
-      news: 'Latest News',
-      service: 'Our Services',
-      tips: 'Tips'
-    }[category] || 'Articles';
+    function formatDate(iso){ try {
+      return new Date(iso.replace(' ', 'T')).toLocaleDateString(undefined,
+        { year:'numeric', month:'short', day:'numeric' });
+    } catch { return ''; } }
 
-    document.title            = `${niceName} – Physio Therapy`;
-    qs('#pageTitle').textContent = niceName;
-    qs('#pageSub').textContent   = `Showing all “${category}” posts`;
+    function buildCanonical(withPage=true){
+      const url = new URL(location.href);
+      if (!withPage) {
+        url.searchParams.delete('page');
+      } else {
+        // keep current page param
+        if (page === 1) url.searchParams.delete('page'); // avoid ?page=1 as canonical
+      }
+      return url.toString();
+    }
 
-    // --- fetch + render with client-side paging -----------------------
-    let all = [], shown = 0;
-    const PAGE = 9;
+    function setSEO(catMeta){
+      const site = 'Physio Therapy';
+      const title = `${catMeta.title} – ${site}`;
+      const desc  = catMeta.desc;
 
+      document.title = title;
+      setMeta('description', desc);
+      setOG('og:title', title);
+      setOG('og:description', desc);
+      setOG('og:url', buildCanonical());
+
+      // canonical
+      setCanonical(buildCanonical(true));
+
+      // also expose an alternate canonical without ?page for page 1
+      if (page === 1) setCanonical(buildCanonical(false));
+    }
+
+    function setMeta(name, content){
+      let el = document.querySelector(`meta[name="${name}"]`);
+      if (!el){ el = document.createElement('meta'); el.setAttribute('name', name); document.head.appendChild(el); }
+      el.setAttribute('content', content);
+    }
+    function setOG(prop, content){
+      let el = document.querySelector(`meta[property="${prop}"]`);
+      if (!el){ el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+      el.setAttribute('content', content);
+    }
+    function setCanonical(href){
+      let link = document.querySelector('link[rel="canonical"]');
+      if (!link){ link = document.createElement('link'); link.setAttribute('rel','canonical'); document.head.appendChild(link); }
+      link.setAttribute('href', href);
+    }
+
+    /* -------------------- renderers -------------------- */
     function card(p){
-      const img = p.image_url ? `<img src="${p.image_url}" class="card-img-top" alt="${p.title}">` : '';
+      const img = p.image_url ? `
+        <div class="card-img-wrap">
+          <img src="${p.image_url}" alt="${p.title}" loading="lazy">
+        </div>` : '';
       return `
-        <div class="col-md-4">
-          <div class="card shadow h-100">
+        <div class="col-md-6 col-lg-4">
+          <article class="card h-100" itemscope itemtype="https://schema.org/Article">
             ${img}
             <div class="card-body d-flex flex-column">
-              <h5 class="card-title">${p.title}</h5>
-              <p class="card-text flex-grow-1">${p.excerpt ?? ''}</p>
-              <a href="post.html?slug=${encodeURIComponent(p.slug)}" class="btn btn-outline-primary mt-auto">Read More</a>
+              <h2 class="h5 card-title mb-2" itemprop="headline">
+                <a href="post.html?slug=${encodeURIComponent(p.slug)}" class="stretched-link" itemprop="url">${p.title}</a>
+              </h2>
+              <div class="post-meta mb-2">
+                <time datetime="${p.created_at}" itemprop="datePublished">${formatDate(p.created_at)}</time>
+              </div>
+              <p class="card-text flex-grow-1" itemprop="description">${p.excerpt ?? ''}</p>
             </div>
-          </div>
+          </article>
         </div>`;
     }
 
-    function renderMore(){
-      const slice = all.slice(shown, shown + PAGE);
-      shown += slice.length;
-      qs('#cardsRow').insertAdjacentHTML('beforeend', slice.map(card).join(''));
-      qs('#loadMoreBtn').classList.toggle('d-none', shown >= all.length);
+    function renderPagination(total){
+      const totalPages = Math.max(1, Math.ceil(total / per));
+      const ul = qs('#pager');
+      if (totalPages <= 1){ ul.innerHTML = ''; return; }
+
+      function link(p, label, rel, disabled=false, active=false){
+        const url = new URL(location.href);
+        if (p <= 1) url.searchParams.delete('page'); else url.searchParams.set('page', p);
+        return `
+          <li class="page-item ${disabled?'disabled':''} ${active?'active':''}">
+            <a class="page-link" href="${url.toString()}" ${rel ? `rel="${rel}"` : ''}>${label}</a>
+          </li>`;
+      }
+
+      let html = '';
+      html += link(page-1, '«', 'prev', page<=1);
+      for (let p=1; p<=totalPages; p++){
+        if (p===1 || p===totalPages || Math.abs(p-page)<=1){
+          html += link(p, p, '', false, p===page);
+        } else if (Math.abs(p-page)===2) {
+          html += `<li class="page-item disabled"><span class="page-link">…</span></li>`;
+        }
+      }
+      html += link(page+1, '»', 'next', page>=totalPages);
+      ul.innerHTML = html;
     }
 
+    function renderList(items){
+      qs('#grid').innerHTML = items.map(card).join('') || `
+        <div class="col-12">
+          <div class="alert alert-secondary">No posts found in this category yet.</div>
+        </div>`;
+    }
+
+    function renderBreadcrumbAndHeader(catMeta){
+      qs('#crumbCategory').textContent = catMeta.title;
+      qs('#categoryTitle').textContent = catMeta.title;
+      qs('#categoryDesc').textContent  = catMeta.desc;
+    }
+
+    function buildItemListJsonLd(items){
+      const ld = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": items.map((p, i) => ({
+          "@type": "ListItem",
+          "position": (i+1) + (page-1)*per,
+          "url": location.origin + "/post.html?slug=" + encodeURIComponent(p.slug),
+          "name": p.title,
+          "image": p.image_url || undefined
+        }))
+      };
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(ld);
+      document.head.appendChild(script);
+    }
+
+    /* -------------------- main -------------------- */
     (async () => {
-      const r = await fetch('/api/posts');
-      if (!r.ok) { qs('#cardsRow').innerHTML = '<p class="text-danger">Failed to load posts.</p>'; return; }
-      const posts = (await r.json()).filter(p => p.published && p.category === category);
-      // sort newest-first
-      all = posts.sort((a,b)=> new Date(b.created_at) - new Date(a.created_at));
-      if (!all.length){
-        qs('#cardsRow').innerHTML = '<p class="text-muted">Nothing here yet.</p>';
-        return;
+      const catMeta = CAT_LABELS[cat] || { title: cat.charAt(0).toUpperCase()+cat.slice(1), desc: 'Articles in this category.' };
+      renderBreadcrumbAndHeader(catMeta);
+      setSEO(catMeta);
+
+      try{
+        const r = await fetch('/api/posts');
+        if (!r.ok) throw new Error('API error');
+        const all = (await r.json())
+          .filter(p => p.published && (p.category || 'news').toLowerCase() === cat);
+
+        // Sort: show featured first, then newest
+        all.sort((a,b) => (b.featured||0) - (a.featured||0) || new Date(b.created_at) - new Date(a.created_at));
+
+        // Pagination slice
+        const start = (page-1) * per;
+        const pageItems = all.slice(start, start + per);
+
+        renderList(pageItems);
+        renderPagination(all.length);
+        buildItemListJsonLd(pageItems);
+
+      } catch (err){
+        console.error(err);
+        qs('#grid').innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-danger">Sorry, we couldn’t load this category right now.</div>
+          </div>`;
       }
-      renderMore();
-      qs('#loadMoreBtn').addEventListener('click', renderMore);
     })();
   </script>
 </body>
