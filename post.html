@@ -111,7 +111,16 @@
     </div>
   </div>
 
-  <!-- ===== BREADCRUMB ================================================= -->
+  <!-- ===== HERO BANNER =============================================== -->
+  <header id="heroBanner" class="hero-banner">
+    <div class="overlay"></div>
+    <div class="container h-100 d-flex align-items-end">
+      <!-- Visible headline (microdata handled inside <article>) -->
+      <h1 id="heroTitle" class="mb-4 display-5 text-dark"></h1>
+    </div>
+  </header>
+
+  <!-- ===== BREADCRUMB (below hero) =================================== -->
   <section class="crumbbar py-2">
     <div class="container">
       <nav aria-label="breadcrumb">
@@ -143,19 +152,12 @@
     </div>
   </section>
 
-  <!-- ===== HERO BANNER =============================================== -->
-  <header id="heroBanner" class="hero-banner">
-    <div class="overlay"></div>
-    <div class="container h-100 d-flex align-items-end">
-      <!-- Headline is part of Article microdata -->
-      <h1 id="heroTitle" class="mb-4 display-5 text-dark" itemprop="headline"></h1>
-    </div>
-  </header>
-
   <!-- ===== ARTICLE BODY ============================================= -->
   <main class="container py-5">
-    <!-- Proper Article wrapper; articleBody on a child below -->
+    <!-- Proper Article wrapper -->
     <article id="article" itemscope itemtype="https://schema.org/Article">
+      <!-- Structured-data headline (kept inside the Article scope) -->
+      <meta id="metaHeadline" itemprop="headline" content="">
       <div id="articleContent" itemprop="articleBody"></div>
 
       <!-- Hidden times for microdata (filled by JS) -->
@@ -267,6 +269,9 @@
 
         /* ===== Article body ===== */
         qs('#articleContent').innerHTML = post.content_html || '';
+        // Structured headline inside Article scope
+        const metaHeadline = document.getElementById('metaHeadline');
+        if (metaHeadline) metaHeadline.setAttribute('content', post.title || '');
 
         // Microdata times
         const pubISO = iso(post.created_at);
