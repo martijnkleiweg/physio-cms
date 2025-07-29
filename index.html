@@ -10,6 +10,62 @@
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/styles3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
+
+  <!-- Homepage styles to match category/post -->
+  <style>
+    /* Card image with consistent ratio & cover crop */
+    .card-img-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 62.5%;              /* ~16:10 ratio */
+      overflow: hidden;
+      background: #f0f0f0;
+      border-top-left-radius: .5rem;   /* match .card rounding */
+      border-top-right-radius: .5rem;
+    }
+    .card-img-wrap img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+    }
+    /* Black headings, underline on hover, accessible focus */
+    .card-title a {
+      color: #212529;
+      text-decoration: none;
+    }
+    .card-title a:hover,
+    .card-title a:focus {
+      text-decoration: underline;
+    }
+    .card-title a:focus-visible {
+      outline: 2px solid #0d6efd;
+      outline-offset: 2px;
+    }
+    .card-title { font-weight: 700; } /* stronger headings */
+
+    .post-meta { font-size: .9rem; color: #6c757d; }
+
+    /* Section headers */
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; margin-bottom: 1rem;
+    }
+    .section-head h2 { margin: 0; }
+    .section-head .view-all { text-decoration: none; }
+    .section-head .view-all:hover { text-decoration: underline; }
+  </style>
+
+  <!-- SEO (static for homepage) -->
+  <meta name="description" content="Physio Therapy — personalized treatments, services, and the latest news from our clinic.">
+  <link rel="canonical" href="/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Physio Therapy">
+  <meta property="og:description" content="Physio Therapy — personalized treatments, services, and the latest news from our clinic.">
+  <meta property="og:url" content="/">
+  <meta property="og:site_name" content="Physio Therapy">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Physio Therapy">
+  <meta name="twitter:description" content="Physio Therapy — personalized treatments, services, and the latest news from our clinic.">
 </head>
 <body>
   <!-- ===== TOP BAR ==================================================== -->
@@ -32,7 +88,7 @@
   <header class="bg-white py-3 shadow-sm sticky-top">
     <div class="container">
       <nav class="navbar navbar-expand-lg navbar-light bg-white" aria-label="Primary navigation">
-        <a class="navbar-brand" href="#"><img src="images/logo.png" alt="Physio Therapy Logo" class="img-fluid"></a>
+        <a class="navbar-brand" href="/"><img src="images/logo.png" alt="Physio Therapy Logo" class="img-fluid"></a>
 
         <button class="navbar-toggler d-lg-none" type="button"
                 data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
@@ -82,30 +138,26 @@
   </section>
 
   <!-- ===== SERVICES (dynamic) ========================================= -->
-
   <section id="services" class="py-5">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0">Our Services</h2>
-      <a href="category.html?category=service" class="btn btn-link">View all services →</a>
+    <div class="container">
+      <div class="section-head">
+        <h2>Our Services</h2>
+        <a href="category.html?category=service" class="view-all">View all services →</a>
+      </div>
+      <div id="servicesRow" class="row g-4"></div>
     </div>
-    <div id="servicesRow" class="row g-4"></div>
-  </div>
-</section>
-
+  </section>
 
   <!-- ===== LATEST NEWS (dynamic) ====================================== -->
-  
   <section id="blog" class="bg-light py-5">
     <div class="container">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Latest News</h2>
-        <a href="category.html?category=news" class="btn btn-link">View all news →</a>
+      <div class="section-head">
+        <h2>Latest News</h2>
+        <a href="category.html?category=news" class="view-all">View all news →</a>
       </div>
       <div id="newsRow" class="row g-4"></div>
     </div>
   </section>
-
 
   <!-- ===== FOOTER / MISC ============================================= -->
   <a href="#" class="back-to-top"><i class="bi bi-arrow-up-circle-fill"></i></a>
@@ -117,59 +169,129 @@
   <!-- ===== JS ========================================================= -->
   <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
-<!-- ============  Dynamic content loader  ============ -->
-<script type="module">
-  async function getPosts () {
-    const r = await fetch('/api/posts');
-    return r.ok ? (await r.json()).filter(p => p.published) : [];
-  }
+  <!-- ============  Dynamic content loader  ============ -->
+  <script type="module">
+    const qs = s => document.querySelector(s);
 
-  /* ------------ card factory (uses image_url directly) ------------ */
-  function card (p) {
-    const imgTag = p.image_url ? `<img src="${p.image_url}" class="card-img-top" alt="${p.title}">` : '';
-    return `
-      <div class="col-md-4">
-        <div class="card shadow h-100">
-          ${imgTag}
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title">${p.title}</h5>
-            <p class="card-text flex-grow-1">${p.excerpt ?? ''}</p>
-            <a href="post.html?slug=${encodeURIComponent(p.slug)}"
-               class="btn btn-outline-primary mt-auto">Read More</a>
-          </div>
-        </div>
-      </div>`;
-  }
+    function formatDate(iso){
+      try {
+        return new Date((iso || '').replace(' ', 'T'))
+          .toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+      } catch { return ''; }
+    }
 
-  function pickHomepage(posts, cat, n=3){
-    const inCat    = posts.filter(p => p.category === cat && p.published);
-    const featured = inCat
-      .filter(p => p.featured)
-      .sort((a,b)=> new Date(b.updated_at) - new Date(a.updated_at))
-      .slice(0, n);
-    if (featured.length >= n) return featured;
+    async function getPosts () {
+      try {
+        const r = await fetch('/api/posts');
+        return r.ok ? (await r.json()).filter(p => p.published) : [];
+      } catch {
+        return [];
+      }
+    }
 
-    const remainder = inCat
-      .filter(p => !p.featured)
-      .sort((a,b)=> new Date(b.created_at) - new Date(a.created_at))
-      .slice(0, n - featured.length);
+    // Featured first, then newest (limit n)
+    function pickHomepage(posts, cat, n=3){
+      const inCat = posts.filter(p => (p.category || '').toLowerCase() === cat && p.published);
+      const featured = inCat
+        .filter(p => p.featured)
+        .sort((a,b)=> new Date(b.updated_at) - new Date(a.updated_at))
+        .slice(0, n);
 
-    return [...featured, ...remainder];
-  }
+      if (featured.length >= n) return featured;
 
-  (async () => {
-    const posts = await getPosts();
+      const remainder = inCat
+        .filter(p => !p.featured)
+        .sort((a,b)=> new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, n - featured.length);
 
-    const services = pickHomepage(posts, 'service', 3);
-    const news     = pickHomepage(posts, 'news', 3);
+      return [...featured, ...remainder];
+    }
 
-    document.getElementById('servicesRow').innerHTML =
-      services.map(card).join('') || '<p class="text-muted">Services coming soon.</p>';
+    function card (p) {
+      const img = p.image_url ? `
+        <div class="card-img-wrap">
+          <img src="${p.image_url}" alt="${p.title}" loading="lazy">
+        </div>` : '';
 
-    document.getElementById('newsRow').innerHTML =
-      news.map(card).join('') || '<p class="text-muted">No news yet.</p>';
-  })();
+      const showDate = (p.category || '').toLowerCase() === 'news';
+      const dateHtml = showDate && p.created_at
+        ? `<div class="post-meta mb-2"><time datetime="${p.created_at}">${formatDate(p.created_at)}</time></div>`
+        : '';
 
-</script>
+      return `
+        <div class="col-md-6 col-lg-4">
+          <article class="card h-100" itemscope itemtype="https://schema.org/Article">
+            ${img}
+            <div class="card-body d-flex flex-column">
+              <h3 class="h5 card-title mb-2" itemprop="headline">
+                <a href="post.html?slug=${encodeURIComponent(p.slug)}" class="stretched-link" itemprop="url">
+                  ${p.title}
+                </a>
+              </h3>
+              ${dateHtml}
+              <p class="card-text flex-grow-1" itemprop="description">${p.excerpt ?? ''}</p>
+            </div>
+          </article>
+        </div>`;
+    }
+
+    function absolute(url){
+      try { return new URL(url, location.origin).toString(); }
+      catch { return ''; }
+    }
+
+    function pushItemListJsonLd(id, items){
+      const ld = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "@id": id,
+        "itemListElement": items.map((p, i) => ({
+          "@type": "ListItem",
+          "position": i + 1,
+          "url": location.origin + "/post.html?slug=" + encodeURIComponent(p.slug),
+          "name": p.title,
+          "image": p.image_url ? absolute(p.image_url) : undefined
+        }))
+      };
+      const s = document.createElement('script');
+      s.type = 'application/ld+json';
+      s.textContent = JSON.stringify(ld);
+      document.head.appendChild(s);
+    }
+
+    function pushWebsiteJsonLd(){
+      const ld = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Physio Therapy",
+        "url": location.origin + "/"
+      };
+      const s = document.createElement('script');
+      s.type = 'application/ld+json';
+      s.textContent = JSON.stringify(ld);
+      document.head.appendChild(s);
+    }
+
+    (async () => {
+      pushWebsiteJsonLd();
+
+      const posts = await getPosts();
+
+      const services = pickHomepage(posts, 'service', 3);
+      const news     = pickHomepage(posts, 'news', 3);
+
+      // Render Services
+      qs('#servicesRow').innerHTML =
+        services.map(card).join('') || '<p class="text-muted">Services coming soon.</p>';
+
+      // Render News
+      qs('#newsRow').innerHTML =
+        news.map(card).join('') || '<p class="text-muted">No news yet.</p>';
+
+      // JSON-LD for the visible lists
+      if (services.length) pushItemListJsonLd("#services", services);
+      if (news.length)     pushItemListJsonLd("#news", news);
+    })();
+  </script>
 </body>
 </html>
