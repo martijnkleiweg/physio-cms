@@ -35,6 +35,24 @@
     }
     .post-meta { font-size:.9rem; color:#6c757d; }
     .pagination .page-link { border-radius:.5rem; }
+
+    /* Black, non-underlined headings on cards */
+    .card-title a {
+      color: #212529;            /* Bootstrap's text-dark */
+      text-decoration: none;
+    }
+
+    .card-title a:hover,
+    .card-title a:focus {
+      text-decoration: underline; /* <- or keep none if you prefer absolutely no underline */
+    }
+
+    /* Accessible keyboard focus without changing color */
+    .card-title a:focus-visible {
+      outline: 2px solid #0d6efd; /* Bootstrap primary */
+      outline-offset: 2px;
+    }
+
   </style>
 
   <!-- Default SEO (will be overwritten dynamically for crawlers that parse JS) -->
