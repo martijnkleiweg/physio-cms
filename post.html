@@ -29,10 +29,34 @@
     .hero-banner .container{position:relative;z-index:2;}
     .hero-banner .overlay{display:none;}     /* remove dark overlay */
 
-    /* Breadcrumb */
-    .crumbbar { background:#f8f9fa; border-bottom:1px solid #eef2f7; }
-    .breadcrumb a { text-decoration:none; color:inherit; }
-    .breadcrumb a:hover { text-decoration:underline; }
+    /* Breadcrumb — lighter gray */
+    .crumbbar {
+      background: #fafbfc;                 /* a touch lighter than #f8f9fa */
+      border-bottom: 1px solid #eef2f7;
+    }
+    .crumbbar .breadcrumb {
+      color: #6c757d;                       /* muted text */
+    }
+    .crumbbar .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+      color: #adb5bd;                        /* lighter separator “/” */
+    }
+    .crumbbar .breadcrumb a {
+      color: #6c757d;                        /* muted link */
+      text-decoration: none;
+    }
+    .crumbbar .breadcrumb a:hover,
+    .crumbbar .breadcrumb a:focus {
+      color: #495057;                        /* slightly darker on hover/focus */
+      text-decoration: underline;
+    }
+    .crumbbar .breadcrumb .active {
+      color: #8a8f98;                        /* keep current page lighter */
+    }
+    .crumbbar .breadcrumb a:focus-visible {
+      outline: 2px solid #0d6efd;
+      outline-offset: 2px;
+    }
+
   </style>
 
   <!-- Defaults that JS will overwrite -->
