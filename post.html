@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="css/styles3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
 
-  <!-- Hero tweaks -->
+  <!-- Hero & breadcrumb tweaks -->
   <style>
     .hero-banner{
       height:45vh;
@@ -28,6 +28,11 @@
     }
     .hero-banner .container{position:relative;z-index:2;}
     .hero-banner .overlay{display:none;}     /* remove dark overlay */
+
+    /* Breadcrumb */
+    .crumbbar { background:#f8f9fa; border-bottom:1px solid #eef2f7; }
+    .breadcrumb a { text-decoration:none; color:inherit; }
+    .breadcrumb a:hover { text-decoration:underline; }
   </style>
 
   <!-- Defaults that JS will overwrite -->
@@ -106,23 +111,57 @@
     </div>
   </div>
 
+  <!-- ===== BREADCRUMB ================================================= -->
+  <section class="crumbbar py-2">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0" itemscope itemtype="https://schema.org/BreadcrumbList">
+          <!-- Home -->
+          <li class="breadcrumb-item"
+              itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a href="/" itemprop="item"><span itemprop="name">Home</span></a>
+            <meta itemprop="position" content="1">
+          </li>
+          <!-- Category (filled by JS) -->
+          <li class="breadcrumb-item"
+              id="bcCat"
+              itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a id="bcCatLink" href="#" itemprop="item">
+              <span id="bcCatName" itemprop="name">Category</span>
+            </a>
+            <meta itemprop="position" content="2">
+          </li>
+          <!-- Post title (filled by JS) -->
+          <li class="breadcrumb-item active" aria-current="page"
+              id="bcPost"
+              itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <span id="bcPostName" itemprop="name">Post</span>
+            <meta itemprop="position" content="3">
+          </li>
+        </ol>
+      </nav>
+    </div>
+  </section>
+
   <!-- ===== HERO BANNER =============================================== -->
   <header id="heroBanner" class="hero-banner">
     <div class="overlay"></div>
     <div class="container h-100 d-flex align-items-end">
-      <!-- Mark headline for microdata -->
+      <!-- Headline is part of Article microdata -->
       <h1 id="heroTitle" class="mb-4 display-5 text-dark" itemprop="headline"></h1>
     </div>
   </header>
 
   <!-- ===== ARTICLE BODY ============================================= -->
   <main class="container py-5">
-    <!-- Schema.org Article wrapper -->
-    <article id="articleContent" itemscope itemtype="https://schema.org/Article" itemprop="articleBody"></article>
+    <!-- Proper Article wrapper; articleBody on a child below -->
+    <article id="article" itemscope itemtype="https://schema.org/Article">
+      <div id="articleContent" itemprop="articleBody"></div>
 
-    <!-- Hidden times for microdata (filled by JS) -->
-    <time id="publishedTime" itemprop="datePublished" datetime="" hidden></time>
-    <time id="modifiedTime"  itemprop="dateModified"  datetime="" hidden></time>
+      <!-- Hidden times for microdata (filled by JS) -->
+      <time id="publishedTime" itemprop="datePublished" datetime="" hidden></time>
+      <time id="modifiedTime"  itemprop="dateModified"  datetime="" hidden></time>
+    </article>
   </main>
 
   <!-- ===== FOOTER / BACK-TO-TOP ===================================== -->
@@ -140,11 +179,7 @@
     if (!slug) location.href = '/';
 
     const SITE_NAME = 'Physio Therapy';
-    const CAT_LABELS = {
-      news    : 'News',
-      service : 'Services',
-      tips    : 'Tips'
-    };
+    const CAT_LABELS = { news:'News', service:'Services', tips:'Tips' };
 
     // Replace "-card.<ext>" with "-hero.<ext>" if possible
     function deriveHeroFromCard(url){
@@ -154,13 +189,13 @@
 
     // SEO helpers
     function setMeta(name, content){
-      if (!content) return;
+      if (content === undefined || content === null) return;
       let el = document.querySelector(`meta[name="${name}"]`);
       if (!el){ el = document.createElement('meta'); el.setAttribute('name', name); document.head.appendChild(el); }
       el.setAttribute('content', content);
     }
     function setOG(prop, content){
-      if (!content) return;
+      if (content === undefined || content === null) return;
       let el = document.querySelector(`meta[property="${prop}"]`);
       if (!el){ el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
       el.setAttribute('content', content);
@@ -194,6 +229,10 @@
       const d = new Date(dt.replace(' ', 'T'));
       return isNaN(d) ? '' : d.toISOString();
     }
+    function absoluteUrl(pathOrUrl){
+      try { return new URL(pathOrUrl, location.origin).toString(); }
+      catch { return location.href; }
+    }
 
     (async () => {
       try {
@@ -201,11 +240,11 @@
         if (!r.ok) throw new Error('404');
         const post = await r.json();
 
-        // Title & headline
+        /* ===== Title & hero ===== */
         document.title = `${post.title} – ${SITE_NAME}`;
         qs('#heroTitle').textContent = post.title;
 
-        // Choose hero: explicit hero_url -> derived hero -> image_url as-is
+        // Prefer hero_url → derived hero → image_url
         let hero = (post.hero_url && post.hero_url.trim())
           ? post.hero_url
           : deriveHeroFromCard(post.image_url) || post.image_url || '';
@@ -226,26 +265,37 @@
           qs('#heroBanner').style.backgroundPosition = posMap[post.hero_pos];
         }
 
-        // Body
+        /* ===== Article body ===== */
         qs('#articleContent').innerHTML = post.content_html || '';
+
         // Microdata times
         const pubISO = iso(post.created_at);
         const modISO = iso(post.updated_at || post.created_at);
         if (pubISO) qs('#publishedTime').setAttribute('datetime', pubISO);
         if (modISO) qs('#modifiedTime').setAttribute('datetime',  modISO);
 
-        /* ===================== SEO ===================== */
+        /* ===== Breadcrumbs ===== */
+        const catKey   = (post.category || 'news').toLowerCase();
+        const catLabel = CAT_LABELS[catKey] || (post.category || 'Category');
+        const catHref  = `/category.html?category=${encodeURIComponent(catKey)}`;
+
+        const bcCatName = document.getElementById('bcCatName');
+        const bcCatLink = document.getElementById('bcCatLink');
+        const bcPostName= document.getElementById('bcPostName');
+
+        if (bcCatName) bcCatName.textContent = catLabel;
+        if (bcCatLink) bcCatLink.href = catHref;
+        if (bcPostName) bcPostName.textContent = post.title;
+
+        /* ===== SEO ===== */
         const canonical = (() => {
           const url = new URL(location.href);
-          // keep only the slug param to avoid junk params being canonicalized
+          // keep only the slug param to avoid junk params
           [...url.searchParams.keys()].forEach(k => { if (k !== 'slug') url.searchParams.delete(k); });
           return url.toString();
         })();
 
-        const absHero = hero
-          ? (hero.startsWith('http') ? hero : (location.origin + hero))
-          : '';
-
+        const absHero = hero ? absoluteUrl(hero) : (post.image_url ? absoluteUrl(post.image_url) : '');
         const description = summarize(post.excerpt || textFromHTML(post.content_html), 160);
         const catTitle = CAT_LABELS[(post.category || '').toLowerCase()] || (post.category || 'Article');
 
@@ -301,14 +351,13 @@
         document.head.appendChild(ld1);
 
         // JSON‑LD: BreadcrumbList
-        const catParam = (post.category || 'news').toLowerCase();
         const breadcrumbLD = {
           "@context":"https://schema.org",
           "@type":"BreadcrumbList",
           "itemListElement":[
             { "@type":"ListItem", "position":1, "name":"Home", "item": location.origin + "/" },
-            { "@type":"ListItem", "position":2, "name": catTitle,
-              "item": location.origin + "/category.html?category=" + encodeURIComponent(catParam) },
+            { "@type":"ListItem", "position":2, "name": catLabel,
+              "item": location.origin + "/category.html?category=" + encodeURIComponent(catKey) },
             { "@type":"ListItem", "position":3, "name": post.title, "item": canonical }
           ]
         };
@@ -316,13 +365,12 @@
         ld2.type = 'application/ld+json';
         ld2.textContent = JSON.stringify(breadcrumbLD);
         document.head.appendChild(ld2);
-        /* =================== /SEO ====================== */
 
       } catch (err) {
         console.error(err);
         qs('#heroTitle').textContent = 'Article not found';
-        qs('#articleContent').innerHTML =
-          '<p class="text-danger">Sorry, this article could not be loaded.</p>';
+        qs('#articleContent')?.insertAdjacentHTML('afterbegin',
+          '<p class="text-danger">Sorry, this article could not be loaded.</p>');
         ensureRobots('noindex, nofollow');
       }
     })();
