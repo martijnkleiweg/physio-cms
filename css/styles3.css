@@ -1,5 +1,5 @@
 /* ================================================================
-   styles3.css  –  cleaned & unified
+   styles3.css  –  cleaned & unified (cards/rounding fixed)
    ================================================================= */
 
 /* ---------- Reset and root utilities ---------- */
@@ -14,6 +14,9 @@
   --dark-color:     #333;
   --white-color:    #fff;
   --font-family: 'Open Sans', Arial, sans-serif;
+
+  /* One source of truth for card rounding */
+  --card-radius: .5rem;
 }
 
 /* ---------- Base layout ---------- */
@@ -25,13 +28,11 @@ body {
   color: var(--dark-color);
   min-width: 320px;
 }
-
 .container { min-width: 320px; }
 
 /* ---------- Top bar ---------- */
 
 .top-bar { background-color: var(--primary-color); }
-
 .top-bar .contact-info span { font-size: 14px; color: var(--white-color); }
 .top-bar .social-icons  i   { font-size: 16px; }
 .top-bar .social-icons a:hover { color: var(--accent-color); }
@@ -42,7 +43,6 @@ header {
   background-color: var(--white-color);
   box-shadow: 0 2px 4px rgba(0,0,0,.1);
 }
-
 .navbar {
   padding: 0;
   display: flex;
@@ -50,7 +50,7 @@ header {
   min-height: 60px;
 }
 
-/* Logo (single, consolidated rules) */
+/* Logo */
 .navbar-brand {
   padding: 0;
   margin-right: 1rem;
@@ -111,7 +111,9 @@ header {
   .navbar .btn-primary { margin-top: 10px; }
 }
 
-/* ---------- Homepage hero (#hero) ---------- */
+/* ================================================================
+   HOMEPAGE HERO (#hero)
+   ================================================================ */
 
 #hero{
   background: url('hero.jpg') no-repeat center center/cover;
@@ -135,7 +137,7 @@ header {
   color: var(--primary-color);
 }
 
-/* ---------- Section headers (home) ---------- */
+/* Section headers (home) */
 .section-head {
   display: flex; align-items: center; justify-content: space-between;
   gap: 1rem; margin-bottom: 1rem;
@@ -165,7 +167,7 @@ footer{
 }
 .social-icons a:hover{ color:var(--accent-color); }
 
-/* Primary buttons */
+/* Buttons */
 .btn-primary{ background-color:var(--primary-color); border-color:var(--primary-color); }
 .btn-primary:hover{ background-color:var(--accent-color); border-color:var(--accent-color); }
 
@@ -228,11 +230,20 @@ header.sticky-top{
 .hero-banner {
   position: relative;
   background-size: cover;
-  background-position: top center;  /* default; can be overridden by JS */
+  background-position: top center;  /* default; JS can override */
   height: 45vh;
 }
-/* article pages usually *don’t* need a dark overlay; keep transparent */
+/* subtle fade into white at bottom */
+.hero-banner::after{
+  content:'';
+  position:absolute; left:0; right:0; bottom:0;
+  height:140px;
+  background:linear-gradient(to bottom, rgba(255,255,255,0) 0%, #fff 100%);
+  pointer-events:none;
+  z-index:1;
+}
 .hero-banner .overlay { position:absolute; inset:0; background: transparent; }
+.hero-banner .container { position:relative; z-index:2; }
 
 /* ================================================================
    CARDS & IMAGES – unified across home + category
@@ -240,27 +251,35 @@ header.sticky-top{
 
 /* Card: unified rounding & clipping; no movement on hover */
 .card {
-  border-radius: var(--bs-card-border-radius, .5rem);
-  overflow: hidden;                     /* clip image corners */
+  --bs-card-border-radius: var(--card-radius);   /* sync Bootstrap var */
+  border-radius: var(--card-radius);
+  border: 1px solid #e9ecef;                     /* consistent light gray line */
+  overflow: hidden;                               /* clip image corners */
   transition: box-shadow .2s ease;
 }
 .card:hover {
   box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
-  transform: none;                      /* ensure no jump globally */
+  transform: none;                                /* ensure no jump globally */
 }
 
-/* If legacy markup uses .card-img-top, keep it sane */
-.card-img-top { height: 250px; object-fit: cover; display:block; }
+/* If legacy markup uses .card-img-top, keep it sane and unrounded */
+.card-img-top {
+  height: 250px;
+  object-fit: cover;
+  display:block;
+  border-radius: 0 !important;                    /* avoid double rounding */
+}
 
-/* Preferred image wrapper: consistent ratio + cover crop */
+/* Preferred image wrapper: consistent ratio + cover crop
+   Parent (.card) owns the rounding; wrapper stays square & white
+   to avoid gray slivers at the corners. */
 .card-img-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;                /* modern browsers */
+  aspect-ratio: 16 / 10;                          /* modern browsers */
   overflow: hidden;
-  background: #f0f0f0;
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
+  background: #fff;                                /* important */
+  border-radius: 0;                                /* parent clips the corners */
 }
 @supports not (aspect-ratio: 1) {
   .card-img-wrap::before { content:""; display:block; padding-top:62.5%; }
@@ -270,6 +289,7 @@ header.sticky-top{
   width: 100%; height: 100%;
   object-fit: cover; object-position: center;
   display: block;
+  border-radius: 0 !important;                    /* ensure no extra rounding */
 }
 
 /* Headings: black, bold, underline on hover/focus */
@@ -282,7 +302,7 @@ header.sticky-top{
 /* Meta text on cards */
 .post-meta { font-size: .9rem; color: #6c757d; }
 
-/* If any legacy selectors re-add transform on home, null them explicitly */
+/* Null any legacy transforms on home sections */
 #services .card:hover, #blog .card:hover { transform: none !important; }
 
 /* ================================================================
