@@ -1,0 +1,16 @@
+<!-- ===== FOOTER / MISC ============================================= -->
+<!-- Back to top -->
+<a href="#" class="back-to-top"><i class="bi bi-arrow-up-circle-fill"></i></a>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-3 text-center">
+  <p>© <span id="year"></span> Fysiotherapie De Doelen. Alle rechten voorbehouden.</p>
+</footer>
+
+<script>
+  // Set current year in footer
+  (function(){
+    var y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+  })();
+</script>
