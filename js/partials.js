@@ -19,7 +19,6 @@ async function loadPartials() {
 // After partials are injected, run common UI setup
 function afterPartialsInit() {
   setCurrentYear();
-  markActiveNav();
   setupOffcanvasAutoclose();
 }
 
@@ -31,22 +30,7 @@ function setCurrentYear() {
   });
 }
 
-// Add .active to the nav link that matches the current path
-function markActiveNav() {
-  const here = location.pathname.replace(/index\.html$/i, '') || '/';
-  const links = document.querySelectorAll('.navbar .nav-link');
 
-  links.forEach((a) => {
-    const href = a.getAttribute('href') || '';
-    try {
-      const url = new URL(href, location.origin);
-      const path = url.pathname.replace(/index\.html$/i, '') || '/';
-      if (path === here) a.classList.add('active');
-    } catch {
-      // ignore malformed hrefs
-    }
-  });
-}
 
 // Close the mobile offcanvas menu when a nav link is clicked
 function setupOffcanvasAutoclose() {
