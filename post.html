@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Article – Physio Therapy</title>
+  <title>Artikel – Fysiotherapie De Doelen</title>
 
   <!-- Fonts & CSS -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,62 +11,14 @@
   <link rel="stylesheet" href="css/styles3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.5.0/font/bootstrap-icons.min.css">
 
-  <!-- Hero & breadcrumb tweaks -->
-  <style>
-    .hero-banner{
-      height:45vh;
-      background-size:cover;
-      background-position: top center;        /* default */
-      background-repeat:no-repeat;
-      position:relative;
-    }
-    /* gentle fade-out into white at the bottom */
-    .hero-banner::after{
-      content:'';position:absolute;left:0;right:0;bottom:0;height:140px;
-      background:linear-gradient(to bottom,rgba(255,255,255,0) 0%, #fff 100%);
-      z-index:1;pointer-events:none;
-    }
-    .hero-banner .container{position:relative;z-index:2;}
-    .hero-banner .overlay{display:none;}     /* remove dark overlay */
-
-    /* Breadcrumb — lighter gray */
-    .crumbbar {
-      background: #fafbfc;                 /* a touch lighter than #f8f9fa */
-      border-bottom: 1px solid #eef2f7;
-    }
-    .crumbbar .breadcrumb {
-      color: #6c757d;                       /* muted text */
-    }
-    .crumbbar .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
-      color: #adb5bd;                        /* lighter separator “/” */
-    }
-    .crumbbar .breadcrumb a {
-      color: #6c757d;                        /* muted link */
-      text-decoration: none;
-    }
-    .crumbbar .breadcrumb a:hover,
-    .crumbbar .breadcrumb a:focus {
-      color: #495057;                        /* slightly darker on hover/focus */
-      text-decoration: underline;
-    }
-    .crumbbar .breadcrumb .active {
-      color: #8a8f98;                        /* keep current page lighter */
-    }
-    .crumbbar .breadcrumb a:focus-visible {
-      outline: 2px solid #0d6efd;
-      outline-offset: 2px;
-    }
-
-  </style>
-
-  <!-- Defaults that JS will overwrite -->
+  <!-- SEO defaults (worden door JS overschreven) -->
   <meta name="description" content="">
   <link rel="canonical" href="/">
   <meta property="og:type" content="article">
   <meta property="og:title" content="">
   <meta property="og:description" content="">
   <meta property="og:url" content="/">
-  <meta property="og:site_name" content="Physio Therapy">
+  <meta property="og:site_name" content="Fysiotherapie De Doelen">
   <meta property="og:image" content="">
   <meta property="og:image:width" content="1280">
   <meta property="og:image:height" content="720">
@@ -76,78 +28,26 @@
   <meta name="twitter:image" content="">
 </head>
 <body>
+
   <!-- ===== TOP BAR ==================================================== -->
-  <div class="top-bar text-white py-2">
-    <div class="container d-flex justify-content-between">
-      <div class="contact-info">
-        <span><i class="bi bi-telephone"></i> 123 456 7890</span>
-        <span class="mx-3"><i class="bi bi-envelope"></i> info@sitename.com</span>
-      </div>
-      <div class="social-icons d-none d-md-block">
-        <a href="#"><i class="bi bi-facebook text-white mx-2"></i></a>
-        <a href="#"><i class="bi bi-twitter text-white mx-2"></i></a>
-        <a href="#"><i class="bi bi-linkedin text-white mx-2"></i></a>
-        <a href="#"><i class="bi bi-instagram text-white mx-2"></i></a>
-      </div>
-    </div>
-  </div>
+  <div data-include="/partials/topbar.html"></div>
 
   <!-- ===== NAVBAR ===================================================== -->
-  <header class="bg-white py-3 shadow-sm sticky-top">
-    <div class="container">
-      <nav class="navbar navbar-expand-lg navbar-light bg-white" aria-label="Primary navigation">
-        <a class="navbar-brand" href="/"><img src="images/logo.png" alt="Physio Therapy Logo" class="img-fluid"></a>
+  <div data-include="/partials/navbar.html"></div>
 
-        <button class="navbar-toggler d-lg-none" type="button"
-                data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
-                aria-controls="mobileMenu" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <ul class="navbar-nav mx-auto d-none d-lg-flex gap-3">
-          <li class="nav-item"><a class="nav-link text-dark" href="/">Home</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="/#about">About Us</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="/#services">Services</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="/#blog">Blog</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="/#contact">Contact</a></li>
-        </ul>
-
-        <a href="#" class="btn btn-primary d-none d-lg-inline-block">Book Appointment</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- ===== MOBILE OFF-CANVAS MENU ==================================== -->
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="mobileMenuLabel">Menu</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body d-flex flex-column justify-content-between">
-      <ul class="navbar-nav gap-2">
-        <li class="nav-item"><a class="nav-link" href="/" data-bs-dismiss="offcanvas">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#about" data-bs-dismiss="offcanvas">About Us</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#services" data-bs-dismiss="offcanvas">Services</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#blog" data-bs-dismiss="offcanvas">Blog</a></li>
-        <li class="nav-item"><a class="nav-link" href="/#contact" data-bs-dismiss="offcanvas">Contact</a></li>
-      </ul>
-      <a href="#" class="btn btn-primary mt-4" data-bs-dismiss="offcanvas">Book Appointment</a>
-    </div>
-  </div>
-
-  <!-- ===== HERO BANNER =============================================== -->
+  <!-- ===== HERO BANNER (stijl komt uit styles3.css) =================== -->
   <header id="heroBanner" class="hero-banner">
     <div class="overlay"></div>
     <div class="container h-100 d-flex align-items-end">
-      <!-- Visible headline (microdata handled inside <article>) -->
+      <!-- Zichtbare titel; structured-data titel staat binnen <article> -->
       <h1 id="heroTitle" class="mb-4 display-5 text-dark"></h1>
     </div>
   </header>
 
-  <!-- ===== BREADCRUMB (below hero) =================================== -->
+  <!-- ===== BREADCRUMB (onder hero) =================================== -->
   <section class="crumbbar py-2">
     <div class="container">
-      <nav aria-label="breadcrumb">
+      <nav aria-label="kruimelpad">
         <ol class="breadcrumb mb-0" itemscope itemtype="https://schema.org/BreadcrumbList">
           <!-- Home -->
           <li class="breadcrumb-item"
@@ -155,20 +55,20 @@
             <a href="/" itemprop="item"><span itemprop="name">Home</span></a>
             <meta itemprop="position" content="1">
           </li>
-          <!-- Category (filled by JS) -->
+          <!-- Categorie (door JS gevuld) -->
           <li class="breadcrumb-item"
               id="bcCat"
               itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
             <a id="bcCatLink" href="#" itemprop="item">
-              <span id="bcCatName" itemprop="name">Category</span>
+              <span id="bcCatName" itemprop="name">Categorie</span>
             </a>
             <meta itemprop="position" content="2">
           </li>
-          <!-- Post title (filled by JS) -->
+          <!-- Artikel (door JS gevuld) -->
           <li class="breadcrumb-item active" aria-current="page"
               id="bcPost"
               itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-            <span id="bcPostName" itemprop="name">Post</span>
+            <span id="bcPostName" itemprop="name">Artikel</span>
             <meta itemprop="position" content="3">
           </li>
         </ol>
@@ -176,38 +76,37 @@
     </div>
   </section>
 
-  <!-- ===== ARTICLE BODY ============================================= -->
+  <!-- ===== ARTIKEL ==================================================== -->
   <main class="container py-5">
-    <!-- Proper Article wrapper -->
+    <!-- Volwaardig Article-blok; articleBody hieronder -->
     <article id="article" itemscope itemtype="https://schema.org/Article">
-      <!-- Structured-data headline (kept inside the Article scope) -->
+      <!-- Headline voor structured data (niet zichtbaar) -->
       <meta id="metaHeadline" itemprop="headline" content="">
       <div id="articleContent" itemprop="articleBody"></div>
 
-      <!-- Hidden times for microdata (filled by JS) -->
+      <!-- Tijden voor microdata (door JS gevuld) -->
       <time id="publishedTime" itemprop="datePublished" datetime="" hidden></time>
       <time id="modifiedTime"  itemprop="dateModified"  datetime="" hidden></time>
     </article>
   </main>
 
-  <!-- ===== FOOTER / BACK-TO-TOP ===================================== -->
-  <a href="#" class="back-to-top"><i class="bi bi-arrow-up-circle-fill"></i></a>
+  <!-- ===== FOOTER ===================================================== -->
+  <div data-include="/partials/footer.html"></div>
 
-  <footer class="bg-dark text-white py-3 text-center">
-    <p>© 2024 Physio Therapy. All rights reserved.</p>
-  </footer>
+  <!-- ===== JS (Bootstrap + partials loader eerst) ===================== -->
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/partials.js" defer></script>
 
-  <!-- ===== JS ======================================================== -->
-  <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- ===== Paginascript =============================================== -->
   <script type="module">
     const qs   = sel => document.querySelector(sel);
     const slug = new URLSearchParams(location.search).get('slug');
     if (!slug) location.href = '/';
 
-    const SITE_NAME = 'Physio Therapy';
-    const CAT_LABELS = { news:'News', service:'Services', tips:'Tips' };
+    const SITE_NAME  = 'Fysiotherapie De Doelen';
+    const CAT_LABELS = { news:'Nieuws', service:'Behandelingen', tips:'Tips' };
 
-    // Replace "-card.<ext>" with "-hero.<ext>" if possible
+    // Vervang "-card.<ext>" door "-hero.<ext>" indien mogelijk
     function deriveHeroFromCard(url){
       if (!url) return '';
       return url.replace(/-card(\.(jpe?g|png|webp|avif))$/i, '-hero$1');
@@ -251,8 +150,7 @@
     }
     function iso(dt){
       if (!dt) return '';
-      // handle "YYYY-MM-DD HH:MM:SS" from SQLite
-      const d = new Date(dt.replace(' ', 'T'));
+      const d = new Date(dt.replace(' ', 'T')); // SQLite -> ISO
       return isNaN(d) ? '' : d.toISOString();
     }
     function absoluteUrl(pathOrUrl){
@@ -266,18 +164,18 @@
         if (!r.ok) throw new Error('404');
         const post = await r.json();
 
-        /* ===== Title & hero ===== */
+        /* ===== Titel & hero ===== */
         document.title = `${post.title} – ${SITE_NAME}`;
         qs('#heroTitle').textContent = post.title;
 
-        // Prefer hero_url → derived hero → image_url
+        // Voorkeur: hero_url → afgeleide hero → image_url
         let hero = (post.hero_url && post.hero_url.trim())
           ? post.hero_url
           : deriveHeroFromCard(post.image_url) || post.image_url || '';
 
         if (hero) {
           qs('#heroBanner').style.backgroundImage = `url('${hero}')`;
-          // Preload hero for perceived speed
+          // Preload voor snellere beleving
           const preload = document.createElement('link');
           preload.rel = 'preload';
           preload.as  = 'image';
@@ -285,19 +183,18 @@
           document.head.appendChild(preload);
         }
 
-        // Honour hero_pos (top / center / bottom)
+        // Uitlijning hero (top/center/bottom)
         const posMap = { top:'top center', center:'center center', bottom:'bottom center' };
         if (post.hero_pos && posMap[post.hero_pos]){
           qs('#heroBanner').style.backgroundPosition = posMap[post.hero_pos];
         }
 
-        /* ===== Article body ===== */
+        /* ===== Artikel ===== */
         qs('#articleContent').innerHTML = post.content_html || '';
-        // Structured headline inside Article scope
         const metaHeadline = document.getElementById('metaHeadline');
         if (metaHeadline) metaHeadline.setAttribute('content', post.title || '');
 
-        // Microdata times
+        // Microdata tijden
         const pubISO = iso(post.created_at);
         const modISO = iso(post.updated_at || post.created_at);
         if (pubISO) qs('#publishedTime').setAttribute('datetime', pubISO);
@@ -305,33 +202,33 @@
 
         /* ===== Breadcrumbs ===== */
         const catKey   = (post.category || 'news').toLowerCase();
-        const catLabel = CAT_LABELS[catKey] || (post.category || 'Category');
+        const catLabel = CAT_LABELS[catKey] || (post.category || 'Categorie');
         const catHref  = `/category.html?category=${encodeURIComponent(catKey)}`;
 
         const bcCatName = document.getElementById('bcCatName');
         const bcCatLink = document.getElementById('bcCatLink');
         const bcPostName= document.getElementById('bcPostName');
 
-        if (bcCatName) bcCatName.textContent = catLabel;
-        if (bcCatLink) bcCatLink.href = catHref;
+        if (bcCatName)  bcCatName.textContent = catLabel;
+        if (bcCatLink)  bcCatLink.href = catHref;
         if (bcPostName) bcPostName.textContent = post.title;
 
         /* ===== SEO ===== */
         const canonical = (() => {
           const url = new URL(location.href);
-          // keep only the slug param to avoid junk params
+          // alleen 'slug' in canonical houden
           [...url.searchParams.keys()].forEach(k => { if (k !== 'slug') url.searchParams.delete(k); });
           return url.toString();
         })();
 
         const absHero = hero ? absoluteUrl(hero) : (post.image_url ? absoluteUrl(post.image_url) : '');
         const description = summarize(post.excerpt || textFromHTML(post.content_html), 160);
-        const catTitle = CAT_LABELS[(post.category || '').toLowerCase()] || (post.category || 'Article');
+        const catTitle = CAT_LABELS[(post.category || '').toLowerCase()] || (post.category || 'Artikel');
 
         setMeta('description', description);
         setCanonical(canonical);
 
-        // Indexing: noindex drafts
+        // Indexering: concepten niet indexeren
         if (!post.published) ensureRobots('noindex, nofollow');
         else ensureRobots('index, follow');
 
@@ -356,7 +253,7 @@
         setMeta('twitter:description', description);
         if (absHero) setMeta('twitter:image', absHero);
 
-        // JSON‑LD: Article
+        // JSON-LD: Article
         const articleLD = {
           "@context": "https://schema.org",
           "@type": "Article",
@@ -379,7 +276,7 @@
         ld1.textContent = JSON.stringify(articleLD);
         document.head.appendChild(ld1);
 
-        // JSON‑LD: BreadcrumbList
+        // JSON-LD: BreadcrumbList
         const breadcrumbLD = {
           "@context":"https://schema.org",
           "@type":"BreadcrumbList",
@@ -397,9 +294,11 @@
 
       } catch (err) {
         console.error(err);
-        qs('#heroTitle').textContent = 'Article not found';
-        qs('#articleContent')?.insertAdjacentHTML('afterbegin',
-          '<p class="text-danger">Sorry, this article could not be loaded.</p>');
+        qs('#heroTitle').textContent = 'Artikel niet gevonden';
+        document.getElementById('articleContent')?.insertAdjacentHTML(
+          'afterbegin',
+          '<p class="text-danger">Sorry, dit artikel kon niet worden geladen.</p>'
+        );
         ensureRobots('noindex, nofollow');
       }
     })();
