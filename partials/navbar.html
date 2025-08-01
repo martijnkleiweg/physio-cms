@@ -2,26 +2,30 @@
 <header class="bg-white py-3 shadow-sm sticky-top">
   <div class="container">
     <nav class="navbar navbar-expand-lg navbar-light bg-white" aria-label="Hoofdnavigatie">
-      <a class="navbar-brand" href="/"><img src="images/logo.png" alt="Logo Fysiotherapie De Doelen" class="img-fluid"></a>
+      <a class="navbar-brand" href="/" aria-label="Home">
+        <img src="/images/logo.png" alt="Fysiotherapie De Doelen logo" class="img-fluid">
+      </a>
 
       <button class="navbar-toggler d-lg-none" type="button"
               data-bs-toggle="offcanvas" data-bs-target="#mobileMenu"
-              aria-controls="mobileMenu" aria-label="Navigatie openen">
+              aria-controls="mobileMenu" aria-label="Menu openen">
         <span class="navbar-toggler-icon"></span>
       </button>
 
+      <!-- Desktop nav: Home removed -->
       <ul class="navbar-nav mx-auto d-none d-lg-flex gap-3">
-        <li class="nav-item"><a class="nav-link text-dark" href="#home">Home</a></li>
-        <li class="nav-item"><a class="nav-link text-dark" href="#about">Over ons</a></li>
-        <li class="nav-item"><a class="nav-link text-dark" href="#services">Behandelingen</a></li>
-        <li class="nav-item"><a class="nav-link text-dark" href="#blog">Nieuws</a></li>
-        <li class="nav-item"><a class="nav-link text-dark" href="#contact">Contact</a></li>
+        <li class="nav-item"><a class="nav-link text-dark" href="/#about">Over ons</a></li>
+        <li class="nav-item"><a class="nav-link text-dark" href="/category.html?category=service">Behandelingen</a></li>
+        <li class="nav-item"><a class="nav-link text-dark" href="/#therapeuten">Therapeuten</a></li>
+        <li class="nav-item"><a class="nav-link text-dark" href="/category.html?category=news">Nieuws</a></li>
+        <li class="nav-item"><a class="nav-link text-dark" href="/#contact">Contact</a></li>
       </ul>
 
-      <a href="#contact" class="btn btn-primary d-none d-lg-inline-block">Maak een afspraak</a>
+      <a href="/#contact" class="btn btn-primary d-none d-lg-inline-block">Maak een afspraak</a>
     </nav>
   </div>
 </header>
+
 
 <!-- ===== MOBILE OFF-CANVAS ========================================= -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
@@ -31,12 +35,13 @@
   </div>
   <div class="offcanvas-body d-flex flex-column justify-content-between">
     <ul class="navbar-nav gap-2">
-      <li class="nav-item"><a class="nav-link" href="#home" data-bs-dismiss="offcanvas">Home</a></li>
-      <li class="nav-item"><a class="nav-link" href="#about" data-bs-dismiss="offcanvas">Over ons</a></li>
-      <li class="nav-item"><a class="nav-link" href="#services" data-bs-dismiss="offcanvas">Behandelingen</a></li>
-      <li class="nav-item"><a class="nav-link" href="#blog" data-bs-dismiss="offcanvas">Nieuws</a></li>
-      <li class="nav-item"><a class="nav-link" href="#contact" data-bs-dismiss="offcanvas">Contact</a></li>
+      <li class="nav-item"><a class="nav-link" href="/" data-bs-dismiss="offcanvas">Home</a></li>
+      <li class="nav-item"><a class="nav-link" href="/#about" data-bs-dismiss="offcanvas">Over ons</a></li>
+      <li class="nav-item"><a class="nav-link" href="/category.html?category=service" data-bs-dismiss="offcanvas">Behandelingen</a></li>
+      <li class="nav-item"><a class="nav-link" href="/#therapeuten" data-bs-dismiss="offcanvas">Therapeuten</a></li>
+      <li class="nav-item"><a class="nav-link" href="/category.html?category=news" data-bs-dismiss="offcanvas">Nieuws</a></li>
+      <li class="nav-item"><a class="nav-link" href="/#contact" data-bs-dismiss="offcanvas">Contact</a></li>
     </ul>
-    <a href="#contact" class="btn btn-primary mt-4" data-bs-dismiss="offcanvas">Maak een afspraak</a>
+    <a href="/#contact" class="btn btn-primary mt-4" data-bs-dismiss="offcanvas">Maak een afspraak</a>
   </div>
 </div>
