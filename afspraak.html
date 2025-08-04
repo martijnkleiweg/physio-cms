@@ -9,129 +9,201 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/styles3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
 
-  <!-- Mini-page styles -->
+  <!-- SEO -->
+  <meta name="description" content="Plan eenvoudig online een afspraak bij Fysiotherapie De Doelen in Gouda. Vul het formulier in en wij nemen snel contact met u op.">
+  <link rel="canonical" href="/afspraak.html">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Maak een afspraak – Fysiotherapie De Doelen">
+  <meta property="og:description" content="Plan eenvoudig online een afspraak bij Fysiotherapie De Doelen in Gouda.">
+  <meta property="og:url"         content="/afspraak.html">
+  <meta property="og:site_name"   content="Fysiotherapie De Doelen">
+
+  <!-- Inline tweaks specifiek voor deze pagina -->
   <style>
-    .form-card{
-      max-width:640px;margin:auto;
+    /* pictogram-stijl in info-cards */
+    .bi { line-height:1; }
+    article.border:hover{
       box-shadow:0 .5rem 1rem rgba(0,0,0,.05);
-      border-radius:.75rem;background:#fff;
+      transition:box-shadow .2s ease;
     }
-    .needs-validation .form-control:invalid{border-color:#dc3545;}
-    .honeypot{position:absolute;left:-9999px;top:-9999px;}
   </style>
 </head>
 <body>
 
-  <!-- Partials -->
+  <!-- TOPBAR & NAVBAR via partials -->
   <div data-include="/partials/topbar.html"></div>
   <div data-include="/partials/navbar.html"></div>
 
-  <!-- Hero / breadcrumb -->
+  <!-- HERO / BREADCRUMB -->
   <section class="category-hero py-4">
     <div class="container">
       <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-2">
-          <li class="breadcrumb-item"><a href="/">Home</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Maak een afspraak</li>
+        <ol class="breadcrumb mb-2" itemscope itemtype="https://schema.org/BreadcrumbList">
+          <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a href="/" itemprop="item"><span itemprop="name">Home</span></a>
+            <meta itemprop="position" content="1">
+          </li>
+          <li class="breadcrumb-item active" aria-current="page"
+              itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <span itemprop="name">Maak een afspraak</span>
+            <meta itemprop="position" content="2">
+          </li>
         </ol>
       </nav>
-      <h1>Maak een afspraak</h1>
-      <p class="text-muted mb-0">Vul het formulier in en wij nemen zo snel mogelijk contact met u op.</p>
+
+      <h1 class="mb-0">Plan uw afspraak</h1>
     </div>
   </section>
 
-  <!-- Form ---------------------------------------------------------------->
+  <!-- MAIN -->
   <main class="container py-5">
-    <form id="apptForm" class="form-card p-4 needs-validation" novalidate>
-      <!-- Honeypot -->
-      <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
+    <div class="row g-5 align-items-start">
 
-      <div class="mb-3">
-        <label class="form-label fw-semibold">Naam *</label>
-        <input type="text" name="name" class="form-control" required>
-        <div class="invalid-feedback">Vul uw naam in.</div>
+      <!-- FORMULIER --------------------------------------------------- -->
+      <div class="col-lg-6">
+        <form id="apptForm" class="p-4 border rounded needs-validation" novalidate>
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="naam">Naam&nbsp;*</label>
+            <input type="text" class="form-control" id="naam" name="naam" required>
+            <div class="invalid-feedback">Vul uw naam in.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="email">E-mailadres&nbsp;*</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+            <div class="invalid-feedback">Voer een geldig e-mailadres in.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="tel">Telefoonnummer&nbsp;*</label>
+            <input type="tel" class="form-control" id="tel" name="tel" required>
+            <div class="invalid-feedback">Telefoonnummer is verplicht.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="datum">Gewenste datum&nbsp;*</label>
+            <input type="date" class="form-control" id="datum" name="datum" required>
+            <div class="invalid-feedback">Selecteer een datum.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="dagdeel">Gewenst dagdeel&nbsp;*</label>
+            <select class="form-select" id="dagdeel" name="dagdeel" required>
+              <option value="" selected disabled>Kies…</option>
+              <option>Ochtend</option>
+              <option>Middag</option>
+              <option>Namiddag</option>
+            </select>
+            <div class="invalid-feedback">Kies een dagdeel.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="bericht">Bericht (optioneel)</label>
+            <textarea class="form-control" id="bericht" name="bericht" rows="4"></textarea>
+          </div>
+
+          <!-- simpele anti-spam honeypot -->
+          <input type="text" name="website" class="d-none">
+
+          <button class="btn btn-primary w-100" type="submit" id="btnSubmit">
+            Verzenden
+          </button>
+
+          <!-- feedback placeholder -->
+          <div id="formAlert" class="alert mt-3 d-none" role="alert"></div>
+        </form>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label fw-semibold">E-mailadres *</label>
-        <input type="email" name="email" class="form-control" required>
-        <div class="invalid-feedback">Vul een geldig e-mailadres in.</div>
+      <!-- ILLUSTRATIE -------------------------------------------------- -->
+      <div class="col-lg-6 d-none d-lg-block">
+        <img src="/images/afspraak.jpg" alt="Fysiotherapeut aan het werk"
+             class="img-fluid rounded shadow-sm">
       </div>
+    </div>
 
-      <div class="mb-3">
-        <label class="form-label fw-semibold">Telefoonnummer *</label>
-        <input type="tel" name="phone" class="form-control" required>
-        <div class="invalid-feedback">Vul uw telefoonnummer in.</div>
+    <!-- WAT KUNT U VERWACHTEN ---------------------------------------- -->
+    <section class="mt-5">
+      <h2 class="h4 text-center mb-4">Wat kunt&nbsp;u verwachten?</h2>
+
+      <div class="row g-4">
+        <div class="col-md-4">
+          <article class="text-center px-3 py-4 border rounded h-100">
+            <i class="bi bi-chat-dots-fill fs-1 text-primary mb-3"></i>
+            <h3 class="h6 fw-semibold mb-2">Kennismaking</h3>
+            <p class="mb-0">We bespreken uw klachten en doelen uitgebreid.</p>
+          </article>
+        </div>
+
+        <div class="col-md-4">
+          <article class="text-center px-3 py-4 border rounded h-100">
+            <i class="bi bi-clipboard-check-fill fs-1 text-primary mb-3"></i>
+            <h3 class="h6 fw-semibold mb-2">Onderzoek&nbsp;&amp;&nbsp;plan</h3>
+            <p class="mb-0">Een gericht onderzoek vormt de basis voor een persoonlijk behandelplan.</p>
+          </article>
+        </div>
+
+        <div class="col-md-4">
+          <article class="text-center px-3 py-4 border rounded h-100">
+            <i class="bi bi-heart-pulse-fill fs-1 text-primary mb-3"></i>
+            <h3 class="h6 fw-semibold mb-2">Actieve behandeling</h3>
+            <p class="mb-0">Samen werken we aan herstel en preventie – in de praktijk en thuis.</p>
+          </article>
+        </div>
       </div>
-
-      <div class="mb-3">
-        <label class="form-label fw-semibold">Gewenste datum *</label>
-        <input type="date" name="date" class="form-control" required>
-        <div class="invalid-feedback">Selecteer een datum.</div>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label fw-semibold">Gewenst dagdeel *</label>
-        <select name="timeslot" class="form-select" required>
-          <option value="" selected disabled>Kies…</option>
-          <option>Ochtend</option>
-          <option>Middag</option>
-          <option>Namiddag</option>
-        </select>
-        <div class="invalid-feedback">Kies een dagdeel.</div>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label fw-semibold">Bericht (optioneel)</label>
-        <textarea name="message" class="form-control" rows="4"></textarea>
-      </div>
-
-      <button class="btn btn-primary w-100" type="submit" id="submitBtn">
-        Verzenden
-      </button>
-
-      <div class="alert mt-3 d-none" id="formAlert"></div>
-    </form>
+    </section>
   </main>
 
-  <!-- Footer -->
+  <!-- FOOTER -->
   <div data-include="/partials/footer.html"></div>
 
-  <!-- JS -->
+  <!-- JS -------------------------------------------------------------- -->
   <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="/js/partials.js" defer></script>
   <script type="module">
-    const form   = document.getElementById('apptForm');
-    const alertB = document.getElementById('formAlert');
-    const btn    = document.getElementById('submitBtn');
+    /* ---- client-side validatie + submit -------------------------------- */
+    const form       = document.getElementById('apptForm');
+    const alertBox   = document.getElementById('formAlert');
+    const btnSubmit  = document.getElementById('btnSubmit');
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      if (!form.checkValidity()) { form.classList.add('was-validated'); return; }
+      // Bootstrap validation
+      form.classList.add('was-validated');
+      if (!form.checkValidity()) return;
 
-      // extra honeypot-check
-      if (form.website.value) return;     // bots vullen vaak alles → stil weigeren
+      // simpele honeypot
+      if (form.website.value) return;           // bot → silently abort
 
-      btn.disabled = true; btn.textContent = 'Verzenden…';
+      // Disable button
+      btnSubmit.disabled = true;
 
+      // Verzamel data
       const data = Object.fromEntries(new FormData(form));
-      try{
-        const r = await fetch('/api/appointments', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify(data)
-        });
-        const res = await r.json();
-        if (!r.ok) throw new Error(res.error || 'Serverfout');
 
-        form.reset(); form.classList.remove('was-validated');
-        alertB.className = 'alert alert-success'; alertB.textContent = 'Bedankt! Wij nemen spoedig contact met u op.';
-      }catch(err){
-        alertB.className = 'alert alert-danger'; alertB.textContent = err.message;
-      }finally{
-        alertB.classList.remove('d-none');
-        btn.disabled = false; btn.textContent = 'Verzenden';
+      try {
+        const r = await fetch('/api/appointments', {
+          method : 'POST',
+          headers: {'Content-Type':'application/json'},
+          body   : JSON.stringify(data)
+        });
+        if (!r.ok) throw new Error(await r.text());
+
+        // Succes
+        alertBox.className = 'alert alert-success mt-3';
+        alertBox.textContent = 'Bedankt! We nemen zo snel mogelijk contact met u op.';
+        alertBox.classList.remove('d-none');
+        form.reset();                          // leeg maken
+        form.classList.remove('was-validated');
+
+      } catch (err){
+        console.error(err);
+        alertBox.className = 'alert alert-danger mt-3';
+        alertBox.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
+        alertBox.classList.remove('d-none');
+      } finally {
+        btnSubmit.disabled = false;
       }
     });
   </script>
