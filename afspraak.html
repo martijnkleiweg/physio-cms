@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Maak een afspraak – Fysiotherapie De Doelen</title>
+
+  <!-- Fonts & CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/styles3.css">
+
+  <!-- Mini-page styles -->
+  <style>
+    .form-card{
+      max-width:640px;margin:auto;
+      box-shadow:0 .5rem 1rem rgba(0,0,0,.05);
+      border-radius:.75rem;background:#fff;
+    }
+    .needs-validation .form-control:invalid{border-color:#dc3545;}
+    .honeypot{position:absolute;left:-9999px;top:-9999px;}
+  </style>
+</head>
+<body>
+
+  <!-- Partials -->
+  <div data-include="/partials/topbar.html"></div>
+  <div data-include="/partials/navbar.html"></div>
+
+  <!-- Hero / breadcrumb -->
+  <section class="category-hero py-4">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Maak een afspraak</li>
+        </ol>
+      </nav>
+      <h1>Maak een afspraak</h1>
+      <p class="text-muted mb-0">Vul het formulier in en wij nemen zo snel mogelijk contact met u op.</p>
+    </div>
+  </section>
+
+  <!-- Form ---------------------------------------------------------------->
+  <main class="container py-5">
+    <form id="apptForm" class="form-card p-4 needs-validation" novalidate>
+      <!-- Honeypot -->
+      <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Naam *</label>
+        <input type="text" name="name" class="form-control" required>
+        <div class="invalid-feedback">Vul uw naam in.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">E-mailadres *</label>
+        <input type="email" name="email" class="form-control" required>
+        <div class="invalid-feedback">Vul een geldig e-mailadres in.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Telefoonnummer *</label>
+        <input type="tel" name="phone" class="form-control" required>
+        <div class="invalid-feedback">Vul uw telefoonnummer in.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Gewenste datum *</label>
+        <input type="date" name="date" class="form-control" required>
+        <div class="invalid-feedback">Selecteer een datum.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Gewenst dagdeel *</label>
+        <select name="timeslot" class="form-select" required>
+          <option value="" selected disabled>Kies…</option>
+          <option>Ochtend</option>
+          <option>Middag</option>
+          <option>Namiddag</option>
+        </select>
+        <div class="invalid-feedback">Kies een dagdeel.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Bericht (optioneel)</label>
+        <textarea name="message" class="form-control" rows="4"></textarea>
+      </div>
+
+      <button class="btn btn-primary w-100" type="submit" id="submitBtn">
+        Verzenden
+      </button>
+
+      <div class="alert mt-3 d-none" id="formAlert"></div>
+    </form>
+  </main>
+
+  <!-- Footer -->
+  <div data-include="/partials/footer.html"></div>
+
+  <!-- JS -->
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/partials.js" defer></script>
+  <script type="module">
+    const form   = document.getElementById('apptForm');
+    const alertB = document.getElementById('formAlert');
+    const btn    = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!form.checkValidity()) { form.classList.add('was-validated'); return; }
+
+      // extra honeypot-check
+      if (form.website.value) return;     // bots vullen vaak alles → stil weigeren
+
+      btn.disabled = true; btn.textContent = 'Verzenden…';
+
+      const data = Object.fromEntries(new FormData(form));
+      try{
+        const r = await fetch('/api/appointments', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(data)
+        });
+        const res = await r.json();
+        if (!r.ok) throw new Error(res.error || 'Serverfout');
+
+        form.reset(); form.classList.remove('was-validated');
+        alertB.className = 'alert alert-success'; alertB.textContent = 'Bedankt! Wij nemen spoedig contact met u op.';
+      }catch(err){
+        alertB.className = 'alert alert-danger'; alertB.textContent = err.message;
+      }finally{
+        alertB.classList.remove('d-none');
+        btn.disabled = false; btn.textContent = 'Verzenden';
+      }
+    });
+  </script>
+</body>
+</html>
