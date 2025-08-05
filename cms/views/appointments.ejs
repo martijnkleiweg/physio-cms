@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Afspraken – Admin</title>
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <style>
+    body { padding: 16px; }
+    .table thead th { white-space: nowrap; }
+    .chip { font-size: .85rem; }
+    .chip.ochtend  { background:#e7f1ff; color:#0d6efd; }
+    .chip.middag   { background:#fff3cd; color:#997404; }
+    .chip.namiddag { background:#e2f7e1; color:#0a7b20; }
+    .nowrap { white-space:nowrap; }
+  </style>
+</head>
+<body>
+  <header class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 m-0">Afspraken</h1>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary btn-sm" href="/admin">Berichten</a>
+      <a class="btn btn-outline-primary btn-sm" href="/admin/appointments.csv">Exporteer CSV</a>
+    </div>
+  </header>
+
+  <section class="mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-sm-6 col-md-4">
+        <label for="search" class="form-label mb-1">Zoeken</label>
+        <input id="search" type="search" class="form-control" placeholder="Zoek op naam, e-mail, telefoon, datum…">
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <label for="periodFilter" class="form-label mb-1">Dagdeel</label>
+        <select id="periodFilter" class="form-select">
+          <option value="">Alle</option>
+          <option value="ochtend">Ochtend</option>
+          <option value="middag">Middag</option>
+          <option value="namiddag">Namiddag</option>
+        </select>
+      </div>
+      <div class="col-md-5 text-md-end">
+        <small class="text-muted" id="countLabel"></small>
+      </div>
+    </div>
+  </section>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Ingediend</th>
+          <th>Naam</th>
+          <th>E-mail</th>
+          <th>Telefoon</th>
+          <th>Datum</th>
+          <th>Dagdeel</th>
+          <th>Bericht</th>
+          <th class="text-end">Acties</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="8" class="text-muted">Laden…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+
+    let allRows = [];
+
+    function fmtDateTime(iso){
+      try {
+        const d = new Date(iso.replace(' ', 'T'));
+        return d.toLocaleString('nl-NL', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+      } catch { return iso || ''; }
+    }
+    function escapeHTML(s=''){
+      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function render(rows){
+      const tbody = $('#tbody');
+      if (!rows.length){
+        tbody.innerHTML = '<tr><td colspan="8" class="text-muted">Geen afspraken gevonden.</td></tr>';
+        $('#countLabel').textContent = '0 afspraken';
+        return;
+      }
+      $('#countLabel').textContent = rows.length + ' afspraak' + (rows.length===1?'':'pen');
+
+      tbody.innerHTML = rows.map(r => {
+        const chipClass = 'chip badge rounded-pill me-1 ' + (r.period || '').toLowerCase();
+        return `
+          <tr data-id="${r.id}">
+            <td class="nowrap">${fmtDateTime(r.created_at)}</td>
+            <td>${escapeHTML(r.name || '')}</td>
+            <td><a href="mailto:${escapeHTML(r.email || '')}">${escapeHTML(r.email || '')}</a></td>
+            <td><a href="tel:${escapeHTML((r.phone||'').replace(/\\s+/g,''))}">${escapeHTML(r.phone || '')}</a></td>
+            <td class="nowrap">${escapeHTML(r.date || '')}</td>
+            <td><span class="${chipClass}">${escapeHTML((r.period || '').charAt(0).toUpperCase() + (r.period || '').slice(1))}</span></td>
+            <td>${escapeHTML(r.message || '')}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-danger" onclick="delRow(${r.id})" title="Verwijderen">
+                Verwijderen
+              </button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    function applyFilters(){
+      const q = ($('#search').value || '').toLowerCase();
+      const pf = ($('#periodFilter').value || '').toLowerCase();
+      const filtered = allRows.filter(r => {
+        const hay = [r.name, r.email, r.phone, r.date, r.message].join(' ').toLowerCase();
+        const qOk = !q || hay.includes(q);
+        const pOk = !pf || (r.period || '').toLowerCase() === pf;
+        return qOk && pOk;
+      });
+      render(filtered);
+    }
+
+    async function loadRows(){
+      const r = await fetch('/admin/api/appointments', { cache:'no-cache' });
+      if (!r.ok) throw new Error('Kon afspraken niet laden');
+      allRows = await r.json();
+      // newest first (if not already)
+      allRows.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      applyFilters();
+    }
+
+    async function delRow(id){
+      if (!confirm('Weet u zeker dat u deze afspraak wilt verwijderen?')) return;
+      const r = await fetch('/admin/appointments/' + id, { method:'DELETE' });
+      if (!r.ok) { alert('Verwijderen mislukt'); return; }
+      allRows = allRows.filter(x => x.id !== id);
+      applyFilters();
+    }
+
+    $('#search').addEventListener('input', applyFilters);
+    $('#periodFilter').addEventListener('change', applyFilters);
+
+    loadRows().catch(err => {
+      console.error(err);
+      $('#tbody').innerHTML = '<tr><td colspan="8" class="text-danger">Fout bij laden van afspraken.</td></tr>';
+    });
+
+    // expose for inline onclick
+    window.delRow = delRow;
+  </script>
+</body>
+</html>

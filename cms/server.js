@@ -116,8 +116,8 @@ app.post('/api/appointments', apptLimiter, async (req, res) => {
   });
 
   /* --- mail notificatie --- */
-  const mailTo  = process.env.MAIL_TO   || 'you@example.com';
-  const mailFrom= process.env.MAIL_FROM || process.env.SMTP_USER || `no-reply@${process.env.DOMAIN || 'localhost'}`;
+  const mailTo   = process.env.MAIL_TO   || 'you@example.com';
+  const mailFrom = process.env.MAIL_FROM || process.env.SMTP_USER || `no-reply@${process.env.DOMAIN || 'localhost'}`;
 
   try {
     await transporter.sendMail({
@@ -159,6 +159,62 @@ app.get('/admin/:slug', (req,res) => {
   const post = db.findPost(req.params.slug);
   if (!post) return res.redirect('/admin');
   res.render('editor', { post });
+});
+
+/* ===========================================================
+   ADMIN – VIEW APPOINTMENTS
+=========================================================== */
+
+/* HTML page (needs views/appointments.ejs) */
+app.get('/admin/appointments', (req, res) => {
+  res.render('appointments');
+});
+
+/* JSON feed for table */
+app.get('/admin/api/appointments', (req, res) => {
+  try {
+    const rows = db.allAppointments();
+    res.json(rows);
+  } catch (e) {
+    console.error('appointments list error:', e);
+    res.status(500).json({ error: 'Kon afspraken niet laden.' });
+  }
+});
+
+/* CSV export */
+app.get('/admin/appointments.csv', (req, res) => {
+  try {
+    const rows = db.allAppointments();
+    const header = ['id','created_at','name','email','phone','date','period','message','ip'];
+    const esc = v => {
+      const s = (v ?? '').toString();
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    const csv = [
+      header.join(','),
+      ...rows.map(r => header.map(k => esc(r[k])).join(','))
+    ].join('\r\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="appointments.csv"');
+    res.send('\uFEFF' + csv); // BOM for Excel
+  } catch (e) {
+    console.error('appointments csv error:', e);
+    res.status(500).send('Kon CSV niet genereren.');
+  }
+});
+
+/* Delete one appointment by ID */
+app.delete('/admin/appointments/:id', (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) return res.status(400).json({ error: 'Ongeldige ID' });
+    db.deleteAppointment(id);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('appointments delete error:', e);
+    res.status(500).json({ error: 'Verwijderen mislukt.' });
+  }
 });
 
 /* ===========================================================
