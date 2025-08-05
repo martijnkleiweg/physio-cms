@@ -20,14 +20,10 @@
   <meta property="og:url"         content="/afspraak.html">
   <meta property="og:site_name"   content="Fysiotherapie De Doelen">
 
-  <!-- Inline tweaks specifiek voor deze pagina -->
+  <!-- Pagina-specifieke mini-tweaks -->
   <style>
-    /* pictogram-stijl in info-cards */
     .bi { line-height:1; }
-    article.border:hover{
-      box-shadow:0 .5rem 1rem rgba(0,0,0,.05);
-      transition:box-shadow .2s ease;
-    }
+    article.border:hover{ box-shadow:0 .5rem 1rem rgba(0,0,0,.05); transition:box-shadow .2s ease; }
   </style>
 </head>
 <body>
@@ -61,12 +57,13 @@
   <main class="container py-5">
     <div class="row g-5 align-items-start">
 
-      <!-- FORMULIER  -->
+      <!-- FORMULIER -->
       <div class="col-lg-6">
         <form id="apptForm" class="p-4 border rounded needs-validation" novalidate>
           <div class="mb-3">
             <label class="form-label fw-semibold" for="naam">Naam&nbsp;*</label>
-            <input type="text" class="form-control" id="naam" name="naam" required>
+            <!-- name matches API -->
+            <input type="text" class="form-control" id="naam" name="name" required>
             <div class="invalid-feedback">Vul uw naam in.</div>
           </div>
 
@@ -78,44 +75,44 @@
 
           <div class="mb-3">
             <label class="form-label fw-semibold" for="tel">Telefoonnummer&nbsp;*</label>
-            <input type="tel" class="form-control" id="tel" name="tel" required>
+            <input type="tel" class="form-control" id="tel" name="phone" required>
             <div class="invalid-feedback">Telefoonnummer is verplicht.</div>
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-semibold" for="datum">Gewenste datum&nbsp;*</label>
-            <input type="date" class="form-control" id="datum" name="datum" required>
+            <!-- type=date gives YYYY-MM-DD to the API -->
+            <input type="date" class="form-control" id="datum" name="date" required>
             <div class="invalid-feedback">Selecteer een datum.</div>
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-semibold" for="dagdeel">Gewenst dagdeel&nbsp;*</label>
-            <select class="form-select" id="dagdeel" name="dagdeel" required>
+            <select class="form-select" id="dagdeel" name="period" required>
               <option value="" selected disabled>Kies…</option>
-              <option>Ochtend</option>
-              <option>Middag</option>
-              <option>Namiddag</option>
+              <option value="ochtend">Ochtend</option>
+              <option value="middag">Middag</option>
+              <option value="namiddag">Namiddag</option>
             </select>
             <div class="invalid-feedback">Kies een dagdeel.</div>
           </div>
 
           <div class="mb-3">
             <label class="form-label fw-semibold" for="bericht">Bericht (optioneel)</label>
-            <textarea class="form-control" id="bericht" name="bericht" rows="4"></textarea>
+            <textarea class="form-control" id="bericht" name="message" rows="4"></textarea>
           </div>
 
           <!-- simpele anti-spam honeypot -->
-          <input type="text" name="website" class="d-none">
+          <input type="text" name="website" class="d-none" tabindex="-1" autocomplete="off">
 
           <button class="btn btn-primary w-100" type="submit" id="btnSubmit">
             Verzenden
           </button>
 
           <!-- feedback placeholder -->
-          <div id="formAlert" class="alert mt-3 d-none" role="alert"></div>
+          <div id="formAlert" class="alert mt-3 d-none" role="alert" aria-live="polite"></div>
         </form>
       </div>
-
 
       <!-- ILLUSTRATIE -->
       <div class="col-lg-6 d-none d-lg-block">
@@ -124,19 +121,17 @@
           <source
             type="image/webp"
             srcset="/images/rozendaal-1600.webp 1600w"
-            sizes="800px">
-
-          <!-- JPEG fallback (alle browsers) -->
+            sizes="(min-width: 1200px) 800px, (min-width: 992px) 720px, 100vw">
+          <!-- JPEG fallback -->
           <img
             src="/images/rozendaal-1600.jpg"
             alt="Entree van Fysiosport De Rozendaal in Gouda"
             class="img-fluid rounded shadow-sm"
             loading="lazy"
-            width="1600" height="1067"> <!-- hoogte = 1600 × (originele hoogte/breedte) -->
+            width="1600" height="1067">
         </picture>
       </div>
-
-
+    </div>
 
     <!-- WAT KUNT U VERWACHTEN -->
     <section class="mt-5">
@@ -176,43 +171,65 @@
   <!-- JS -->
   <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="/js/partials.js" defer></script>
+
   <script type="module">
     /* ---- client-side validatie + submit -------------------------------- */
-    const form       = document.getElementById('apptForm');
-    const alertBox   = document.getElementById('formAlert');
-    const btnSubmit  = document.getElementById('btnSubmit');
+    const form      = document.getElementById('apptForm');
+    const alertBox  = document.getElementById('formAlert');
+    const btnSubmit = document.getElementById('btnSubmit');
 
-    form.addEventListener('submit', async e => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      // Bootstrap validation
+
+      // Bootstrap validation styling
       form.classList.add('was-validated');
       if (!form.checkValidity()) return;
 
       // simpele honeypot
-      if (form.website.value) return;           // bot → silently abort
+      if (form.website && form.website.value) return;
 
-      // Disable button
       btnSubmit.disabled = true;
+      alertBox.classList.add('d-none');
 
-      // Verzamel data
-      const data = Object.fromEntries(new FormData(form));
+      // Verzamel exact de keys die de API verwacht
+      const data = {
+        name:    form.elements['name'].value.trim(),
+        email:   form.elements['email'].value.trim(),
+        phone:   form.elements['phone'].value.trim(),
+        date:    form.elements['date'].value,       // YYYY-MM-DD van <input type="date">
+        period:  form.elements['period'].value,     // ochtend|middag|namiddag
+        message: form.elements['message'].value.trim()
+      };
 
       try {
-        const r = await fetch('/api/appointments', {
-          method : 'POST',
-          headers: {'Content-Type':'application/json'},
-          body   : JSON.stringify(data)
+        const res = await fetch('/api/appointments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
         });
-        if (!r.ok) throw new Error(await r.text());
+
+        const payload = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          const msg = Array.isArray(payload.errors) && payload.errors.length
+            ? payload.errors.join('<br>')
+            : 'Er ging iets mis. Controleer uw invoer.';
+          alertBox.className = 'alert alert-danger mt-3';
+          alertBox.innerHTML = msg;
+          alertBox.classList.remove('d-none');
+          return;
+        }
 
         // Succes
         alertBox.className = 'alert alert-success mt-3';
-        alertBox.textContent = 'Bedankt! We nemen zo snel mogelijk contact met u op.';
+        alertBox.textContent = payload.warn
+          ? `Bedankt! Uw aanvraag is opgeslagen. Let op: ${payload.warn}`
+          : 'Bedankt! We nemen zo snel mogelijk contact met u op.';
         alertBox.classList.remove('d-none');
-        form.reset();                          // leeg maken
-        form.classList.remove('was-validated');
 
-      } catch (err){
+        form.reset();
+        form.classList.remove('was-validated');
+      } catch (err) {
         console.error(err);
         alertBox.className = 'alert alert-danger mt-3';
         alertBox.textContent = 'Er ging iets mis. Probeer het later opnieuw.';
