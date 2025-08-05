@@ -4,7 +4,7 @@
    • appointments  (“Maak een afspraak”-formulier)
 ----------------------------------------------------------- */
 
-require('dotenv').config();               // optioneel .env
+require('dotenv').config();               // load .env if present
 const express     = require('express');
 const path        = require('path');
 const fs          = require('fs');
@@ -18,6 +18,9 @@ const rateLimit   = require('express-rate-limit');
 const db          = require('./db');
 
 const app = express();
+
+/* If behind a reverse proxy (nginx), trust it for correct req.ip, etc. */
+app.set('trust proxy', true);
 
 /* ===========================================================
    GLOBAL MIDDLEWARE
@@ -57,64 +60,89 @@ const apptLimiter = rateLimit({
   message  : { error: 'Te veel aanvragen – probeer het later opnieuw.' }
 });
 
-/* --- mail transporter (smtp env of fallback console) --- */
-const transporter = (process.env.SMTP_HOST)
+/* --- helpers for env parsing --- */
+function envBool(v, def=false){
+  if (v === undefined) return def;
+  const s = String(v).trim().toLowerCase();
+  return s === '1' || s === 'true' || s === 'yes';
+}
+
+/* --- mail transporter (SMTP env or console fallback) --- */
+const hasSMTP = !!process.env.SMTP_HOST;
+
+const transporter = hasSMTP
   ? nodemailer.createTransport({
-      host  : process.env.SMTP_HOST,
-      port  : Number(process.env.SMTP_PORT) || 587,
-      secure: !!process.env.SMTP_SECURE,     // true = 465
-      auth  : {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
+      host      : process.env.SMTP_HOST,
+      port      : Number(process.env.SMTP_PORT || 587),
+      // secure = true only for implicit TLS (usually port 465). For STARTTLS (587), keep false.
+      secure    : envBool(process.env.SMTP_SECURE, false),
+      auth      : (process.env.SMTP_USER && process.env.SMTP_PASS)
+                  ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+                  : undefined,
+      // On port 587 (STARTTLS), requiring TLS is sensible:
+      requireTLS: true,
+      tls       : { minVersion: 'TLSv1.2' }
     })
   : { sendMail: opts => { console.log('[dev-mail]', opts); return Promise.resolve(); } };
+
+/* Verify SMTP at boot so misconfig shows up clearly in logs */
+if (hasSMTP) {
+  transporter.verify((err) => {
+    if (err) {
+      console.error('[mail] SMTP verify failed:', err);
+    } else {
+      console.log('[mail] SMTP connection OK');
+    }
+  });
+}
 
 app.post('/api/appointments', apptLimiter, async (req, res) => {
   const { name='', email='', phone='', date='', period='', message='' } = req.body || {};
   const errors = [];
 
-  if (!name.trim())           errors.push('Naam is verplicht.');
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))  errors.push('Ongeldig e-mail­adres.');
-  if (!phone.trim())          errors.push('Telefoonnummer is verplicht.');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date))         errors.push('Datumformaat moet YYYY-MM-DD zijn.');
-  if (!['ochtend','middag','namiddag'].includes(period))
-                               errors.push('Ongeldig dagdeel.');
+  if (!name.trim())                                  errors.push('Naam is verplicht.');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))     errors.push('Ongeldig e-mailadres.');
+  if (!phone.trim())                                 errors.push('Telefoonnummer is verplicht.');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date))             errors.push('Datumformaat moet YYYY-MM-DD zijn.');
+  if (!['ochtend','middag','namiddag'].includes((period || '').toLowerCase()))
+                                                     errors.push('Ongeldig dagdeel.');
 
   if (errors.length) return res.status(400).json({ errors });
 
   /* --- save in DB --- */
   db.saveAppointment({
-    name, email, phone, date, period, message,
+    name, email, phone, date, period: period.toLowerCase(), message,
     ip: req.ip
   });
 
   /* --- mail notificatie --- */
-  const mailTo = process.env.MAIL_TO || 'martijnkleiweg@gmail.com';
+  const mailTo  = process.env.MAIL_TO   || 'you@example.com';
+  const mailFrom= process.env.MAIL_FROM || process.env.SMTP_USER || `no-reply@${process.env.DOMAIN || 'localhost'}`;
+
   try {
     await transporter.sendMail({
-      from   : `"Physio CMS" <no-reply@${process.env.DOMAIN || 'localhost'}>`,
+      from   : mailFrom,
       to     : mailTo,
+      replyTo: email, // so you can reply directly to the requester
       subject: `Nieuwe afspraak: ${name} op ${date} (${period})`,
       text   : `
-Naam        : ${name}
-E-mail      : ${email}
-Telefoon    : ${phone}
-Datum       : ${date}
-Dagdeel     : ${period}
-Bericht     : ${message || '-'}
-IP          : ${req.ip}
+Naam     : ${name}
+E-mail   : ${email}
+Telefoon : ${phone}
+Datum    : ${date}
+Dagdeel  : ${period}
+Bericht  : ${message || '-'}
+IP       : ${req.ip}
 `.trim()
     });
   } catch (err) {
     console.error('Mail failed:', err);
-    // afspraak staat al in DB; stuur wel een 200 maar met waarschuwing
+    // Afspraak staat al in DB; stuur 200 met waarschuwing
     return res.status(200).json({ ok:true, warn:'Afspraak opgeslagen, maar e-mail kon niet worden verzonden.' });
   }
 
   res.json({ ok:true });
 });
-
 
 /* ===========================================================
    ADMIN AREA (basic-auth)
