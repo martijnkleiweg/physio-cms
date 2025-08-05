@@ -1,11 +1,8 @@
 /* -----------------------------------------------------------
-   db.js – SQLite wrapper for Physio CMS
-   Fields:
-     - image_url (card image URL)
-     - hero_url  (1280×720 banner URL)
-     - hero_pos  ('top' | 'center' | 'bottom') – vertical focus for hero
-     - featured  (0/1)
-     - published (0/1)
+   db.js – SQLite wrapper voor Physio CMS
+   Bevat nu twee tabellen:
+     • posts
+     • appointments  (online afspraak­formulier)
 ----------------------------------------------------------- */
 const path     = require('path');
 const Database = require('better-sqlite3');
@@ -14,7 +11,10 @@ const Database = require('better-sqlite3');
 const dbPath = path.join(__dirname, 'data', 'physio.sqlite');
 const db     = new Database(dbPath);
 
-/* ---------- ensure table exists ---------- */
+
+/* ===========================================================
+   POSTS  (blog / nieuws / behandelingen)
+=========================================================== */
 db.exec(`
 CREATE TABLE IF NOT EXISTS posts (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,32 +25,30 @@ CREATE TABLE IF NOT EXISTS posts (
   category    TEXT DEFAULT 'news',
   image_url   TEXT DEFAULT '',
   hero_url    TEXT DEFAULT '',
-  hero_pos    TEXT DEFAULT 'center',
-  featured    INTEGER DEFAULT 0,
-  published   INTEGER DEFAULT 0,
+  hero_pos    TEXT DEFAULT 'center',      -- 'top' | 'center' | 'bottom'
+  featured    INTEGER DEFAULT 0,          -- 0|1
+  published   INTEGER DEFAULT 0,          -- 0|1
   created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 `);
 
-/* ---------- lightweight auto-migrations (idempotent) ---------- */
+/* ------ posts: lightweight auto-migrations ------ */
 function addColumnIfMissing(sql) {
   try { db.exec(sql); }
   catch (e) {
-    // Ignore "duplicate column name" errors; rethrow anything else
     if (!/duplicate column name/i.test(e.message)) throw e;
   }
 }
 
-// Ensure columns exist even if table was created before these fields
 addColumnIfMissing(`ALTER TABLE posts ADD COLUMN image_url TEXT DEFAULT ''`);
 addColumnIfMissing(`ALTER TABLE posts ADD COLUMN hero_url  TEXT DEFAULT ''`);
 addColumnIfMissing(`ALTER TABLE posts ADD COLUMN hero_pos  TEXT DEFAULT 'center'`);
 addColumnIfMissing(`ALTER TABLE posts ADD COLUMN featured  INTEGER DEFAULT 0`);
 addColumnIfMissing(`ALTER TABLE posts ADD COLUMN published INTEGER DEFAULT 0`);
 
-/* ---------- prepared statements ---------- */
-const STMT = {
+/* ------ posts: prepared statements ------ */
+const POST = {
   all   : db.prepare(`SELECT * FROM posts ORDER BY created_at DESC`),
   get   : db.prepare(`SELECT * FROM posts WHERE slug = ? LIMIT 1`),
 
@@ -81,45 +79,79 @@ const STMT = {
   del   : db.prepare(`DELETE FROM posts WHERE slug = ?`)
 };
 
-/* ---------- tiny helper to avoid “missing parameter” ---------- */
-function fillDefaults (p){
+function fillPostDefaults (p){
   if (p.image_url === undefined) p.image_url = '';
   if (p.hero_url  === undefined) p.hero_url  = '';
   if (p.hero_pos  === undefined) p.hero_pos  = 'center';
   if (p.featured  === undefined) p.featured  = 0;
   if (p.published === undefined) p.published = 0;
 
-  // normalize values
   p.featured  = p.featured ? 1 : 0;
   p.published = p.published ? 1 : 0;
   if (!['top','center','bottom'].includes(p.hero_pos)) p.hero_pos = 'center';
   return p;
 }
 
-/* ---------- public API ---------- */
+
+/* ===========================================================
+   APPOINTMENTS  (contact/afspraak-formulier)
+   -----------------------------------------------------------
+   • id          PK
+   • name        TEXT  (verplicht)
+   • email       TEXT
+   • phone       TEXT
+   • date        TEXT  ("YYYY-MM-DD")
+   • period      TEXT  ('ochtend' | 'middag' | 'namiddag')
+   • message     TEXT  (optioneel)
+   • ip          TEXT  (voor eenvoudige anti-spam / rate-limit)
+   • created_at  DATETIME
+=========================================================== */
+db.exec(`
+CREATE TABLE IF NOT EXISTS appointments (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  name       TEXT NOT NULL,
+  email      TEXT NOT NULL,
+  phone      TEXT NOT NULL,
+  date       TEXT NOT NULL,
+  period     TEXT NOT NULL,
+  message    TEXT,
+  ip         TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+`);
+
+const APPOINT = {
+  insert: db.prepare(`
+    INSERT INTO appointments
+      (name, email, phone, date, period, message, ip)
+    VALUES
+      (@name, @email, @phone, @date, @period, @message, @ip)
+  `)
+};
+
+
+/* ===========================================================
+   PUBLIC API
+=========================================================== */
 module.exports = {
-  /** newest-first list */
-  all () {
-    return STMT.all.all();
-  },
+  /* ---------- posts ---------- */
+  allPosts () { return POST.all.all(); },
+  findPost (slug) { return POST.get.get(slug); },
+  insertPost (p) { POST.insert.run(fillPostDefaults(p)); },
+  updatePost (p) { POST.update.run(fillPostDefaults(p)); },
+  deletePost (slug) { POST.del.run(slug); },
 
-  /** single post by slug */
-  find (slug) {
-    return STMT.get.get(slug);
-  },
-
-  /** insert new row */
-  insert (p) {
-    STMT.insert.run(fillDefaults(p));
-  },
-
-  /** update existing row */
-  update (p) {
-    STMT.update.run(fillDefaults(p));
-  },
-
-  /** delete by slug */
-  del (slug) {
-    STMT.del.run(slug);
+  /* ---------- appointments ---------- */
+  saveAppointment (data) {
+    // minimale sanity-checks kunnen hier nog uitgebreid worden
+    APPOINT.insert.run({
+      name   : (data.name   || '').trim(),
+      email  : (data.email  || '').trim(),
+      phone  : (data.phone  || '').trim(),
+      date   : (data.date   || '').trim(),   // verwacht YYYY-MM-DD
+      period : (data.period || '').trim(),   // ochtend|middag|namiddag
+      message: (data.message|| '').trim(),
+      ip     : data.ip || null
+    });
   }
 };
