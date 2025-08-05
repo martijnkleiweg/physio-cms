@@ -79,8 +79,7 @@ const transporter = hasSMTP
       auth      : (process.env.SMTP_USER && process.env.SMTP_PASS)
                   ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
                   : undefined,
-      // On port 587 (STARTTLS), requiring TLS is sensible:
-      requireTLS: true,
+      requireTLS: true,                  // good default on 587
       tls       : { minVersion: 'TLSv1.2' }
     })
   : { sendMail: opts => { console.log('[dev-mail]', opts); return Promise.resolve(); } };
@@ -153,16 +152,9 @@ app.use('/admin', basicAuth({
   realm     : 'PhysioCMS'
 }));
 
-/* ---------- editor UI ---------- */
-app.get('/admin',       (_ ,res) => res.render('editor', { post: null }));
-app.get('/admin/:slug', (req,res) => {
-  const post = db.findPost(req.params.slug);
-  if (!post) return res.redirect('/admin');
-  res.render('editor', { post });
-});
-
 /* ===========================================================
    ADMIN – VIEW APPOINTMENTS
+   (Place BEFORE the '/admin/:slug' catch-all!)
 =========================================================== */
 
 /* HTML page (needs views/appointments.ejs) */
@@ -215,6 +207,16 @@ app.delete('/admin/appointments/:id', (req, res) => {
     console.error('appointments delete error:', e);
     res.status(500).json({ error: 'Verwijderen mislukt.' });
   }
+});
+
+/* ---------- editor UI ---------- */
+app.get('/admin',       (_ ,res) => res.render('editor', { post: null }));
+
+/* Keep this AFTER the appointments routes so it doesn't swallow them */
+app.get('/admin/:slug', (req,res) => {
+  const post = db.findPost(req.params.slug);
+  if (!post) return res.redirect('/admin');
+  res.render('editor', { post });
 });
 
 /* ===========================================================
