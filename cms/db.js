@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------
    db.js – SQLite wrapper voor Physio CMS
-   Bevat nu twee tabellen:
+   Bevat twee tabellen:
      • posts
      • appointments  (online afspraak­formulier)
 ----------------------------------------------------------- */
@@ -103,7 +103,7 @@ function fillPostDefaults (p){
    • date        TEXT  ("YYYY-MM-DD")
    • period      TEXT  ('ochtend' | 'middag' | 'namiddag')
    • message     TEXT  (optioneel)
-   • ip          TEXT  (voor eenvoudige anti-spam / rate-limit)
+   • ip          TEXT  (anti-spam / logging)
    • created_at  DATETIME
 =========================================================== */
 db.exec(`
@@ -118,15 +118,24 @@ CREATE TABLE IF NOT EXISTS appointments (
   ip         TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX IF NOT EXISTS idx_appointments_created_at ON appointments (created_at DESC);
 `);
 
 const APPOINT = {
+  all: db.prepare(`
+    SELECT id, name, email, phone, date, period, message, ip, created_at
+    FROM appointments
+    ORDER BY created_at DESC
+  `),
+
   insert: db.prepare(`
     INSERT INTO appointments
       (name, email, phone, date, period, message, ip)
     VALUES
       (@name, @email, @phone, @date, @period, @message, @ip)
-  `)
+  `),
+
+  del: db.prepare(`DELETE FROM appointments WHERE id = ?`)
 };
 
 
@@ -135,23 +144,24 @@ const APPOINT = {
 =========================================================== */
 module.exports = {
   /* ---------- posts ---------- */
-  allPosts () { return POST.all.all(); },
-  findPost (slug) { return POST.get.get(slug); },
-  insertPost (p) { POST.insert.run(fillPostDefaults(p)); },
-  updatePost (p) { POST.update.run(fillPostDefaults(p)); },
-  deletePost (slug) { POST.del.run(slug); },
+  allPosts ()                { return POST.all.all(); },
+  findPost (slug)            { return POST.get.get(slug); },
+  insertPost (p)             { POST.insert.run(fillPostDefaults(p)); },
+  updatePost (p)             { POST.update.run(fillPostDefaults(p)); },
+  deletePost (slug)          { POST.del.run(slug); },
 
   /* ---------- appointments ---------- */
+  allAppointments ()         { return APPOINT.all.all(); },
   saveAppointment (data) {
-    // minimale sanity-checks kunnen hier nog uitgebreid worden
     APPOINT.insert.run({
       name   : (data.name   || '').trim(),
       email  : (data.email  || '').trim(),
       phone  : (data.phone  || '').trim(),
-      date   : (data.date   || '').trim(),   // verwacht YYYY-MM-DD
-      period : (data.period || '').trim(),   // ochtend|middag|namiddag
+      date   : (data.date   || '').trim(),    // verwacht YYYY-MM-DD
+      period : (data.period || '').trim(),    // ochtend|middag|namiddag
       message: (data.message|| '').trim(),
       ip     : data.ip || null
     });
-  }
+  },
+  deleteAppointment (id)     { APPOINT.del.run(id); }
 };
