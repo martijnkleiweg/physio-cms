@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Contact – Fysiotherapie De Doelen</title>
+
+  <!-- Fonts & CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/styles3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+
+  <!-- SEO -->
+  <meta name="description" content="Neem contact op met Fysiotherapie De Doelen in Gouda. Adressen, telefoonnummers, e-mail en contactformulier.">
+  <link rel="canonical" href="/contact.html">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Contact – Fysiotherapie De Doelen">
+  <meta property="og:description" content="Adres, telefoonnummers en contactformulier van Fysiotherapie De Doelen in Gouda.">
+  <meta property="og:url"         content="/contact.html">
+  <meta property="og:site_name"   content="Fysiotherapie De Doelen">
+
+  <!-- Kleine paginatweak -->
+  <style>
+    .contact-card i { width: 1.25rem; }
+    article.border:hover{ box-shadow:0 .5rem 1rem rgba(0,0,0,.05); transition:box-shadow .2s ease; }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR & NAVBAR via partials -->
+  <div data-include="/partials/topbar.html"></div>
+  <div data-include="/partials/navbar.html"></div>
+
+  <!-- HERO / BREADCRUMB -->
+  <section class="category-hero py-4">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2" itemscope itemtype="https://schema.org/BreadcrumbList">
+          <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <a href="/" itemprop="item"><span itemprop="name">Home</span></a>
+            <meta itemprop="position" content="1">
+          </li>
+          <li class="breadcrumb-item active" aria-current="page"
+              itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <span itemprop="name">Contact</span>
+            <meta itemprop="position" content="2">
+          </li>
+        </ol>
+      </nav>
+
+      <h1 class="mb-2">Contact</h1>
+      <p class="text-muted mb-0">
+        Vragen of een afspraak maken? Bel ons of gebruik het contactformulier – we reageren zo snel mogelijk.
+      </p>
+    </div>
+  </section>
+
+  <!-- MAIN -->
+  <main class="container py-5">
+    <div class="row g-5">
+      <!-- FORMULIER -->
+      <div class="col-lg-7">
+        <div class="p-4 border rounded">
+          <h2 class="h4 mb-3">Stuur ons een bericht</h2>
+          <form id="contactForm" class="needs-validation" novalidate>
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="naam">Naam&nbsp;*</label>
+              <input type="text" class="form-control" id="naam" name="name" required>
+              <div class="invalid-feedback">Vul uw naam in.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="email">E-mailadres&nbsp;*</label>
+              <input type="email" class="form-control" id="email" name="email" required>
+              <div class="invalid-feedback">Voer een geldig e-mailadres in.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="tel">Telefoonnummer</label>
+              <input type="tel" class="form-control" id="tel" name="phone" inputmode="tel" placeholder="">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="onderwerp">Onderwerp</label>
+              <input type="text" class="form-control" id="onderwerp" name="subject" placeholder="">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="bericht">Bericht&nbsp;*</label>
+              <textarea class="form-control" id="bericht" name="message" rows="6" required></textarea>
+              <div class="invalid-feedback">Schrijf kort uw vraag of bericht.</div>
+            </div>
+
+            <!-- simpele anti-spam honeypot -->
+            <input type="text" name="website" class="d-none" tabindex="-1" autocomplete="off">
+
+            <button class="btn btn-primary w-100" type="submit" id="btnSubmit">
+              Verzenden
+            </button>
+
+            <div id="formAlert" class="alert mt-3 d-none" role="alert" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- CONTACTGEGEVENS + LOCATIES -->
+      <div class="col-lg-5">
+        <div class="vstack gap-4">
+
+          <!-- Algemene contactkaart -->
+          <article class="border rounded p-4 contact-card">
+            <h2 class="h5 mb-3">Algemene contactgegevens</h2>
+            <p class="mb-2">
+              <i class="bi bi-envelope me-2"></i>
+              <a href="mailto:info@fysiotherapiededoelen.nl">info@fysiotherapiededoelen.nl</a>
+            </p>
+            <p class="mb-3">
+              <i class="bi bi-telephone me-2"></i>
+              <a href="tel:+31182529151">0182&nbsp;–&nbsp;529151</a>
+            </p>
+            <div class="d-flex gap-2">
+              <a class="btn btn-outline-primary btn-sm" href="tel:+31182529151">
+                <i class="bi bi-telephone"></i> Bel
+              </a>
+              <a class="btn btn-outline-secondary btn-sm" href="mailto:info@fysiotherapiededoelen.nl">
+                <i class="bi bi-envelope"></i> E-mail
+              </a>
+            </div>
+          </article>
+
+          <!-- Locatie: Lange Tiendeweg -->
+          <article class="border rounded p-0 overflow-hidden">
+            <div class="p-4">
+              <h2 class="h6 mb-1">Fysiotherapie De Doelen</h2>
+              <p class="mb-2 text-muted">Lange Tiendeweg 93, 2801 KG Gouda</p>
+              <p class="mb-2">
+                <i class="bi bi-envelope me-2"></i>
+                <a href="mailto:info@fysiotherapiededoelen.nl">info@fysiotherapiededoelen.nl</a>
+              </p>
+              <p class="mb-3">
+                <i class="bi bi-telephone me-2"></i>
+                <a href="tel:+31182529151">0182&nbsp;–&nbsp;529151</a>
+              </p>
+              <a class="btn btn-outline-primary btn-sm mb-3"
+                 href="https://www.google.com/maps?q=Lange+Tiendeweg+93,+2801+KG+Gouda"
+                 target="_blank" rel="noopener">Open in Google Maps</a>
+            </div>
+            <div class="ratio ratio-16x9">
+              <iframe
+                title="Kaart Fysiotherapie De Doelen – Lange Tiendeweg 93"
+                src="https://www.google.com/maps?q=Lange+Tiendeweg+93,+2801+KG+Gouda&output=embed"
+                style="border:0;" allowfullscreen loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+          </article>
+
+          <!-- Locatie: Fysiosport Rozendaal -->
+          <article class="border rounded p-0 overflow-hidden">
+            <div class="p-4">
+              <h2 class="h6 mb-1">Fysiosport Rozendaal</h2>
+              <p class="mb-2 text-muted">Rozendaal 9, 2801 XS Gouda</p>
+              <p class="mb-2">
+                <i class="bi bi-envelope me-2"></i>
+                <a href="mailto:info@fysiotherapiededoelen.nl">info@fysiotherapiededoelen.nl</a>
+              </p>
+              <p class="mb-3">
+                <i class="bi bi-telephone me-2"></i>
+                <a href="tel:+31182672900">0182&nbsp;–&nbsp;672900</a>
+              </p>
+              <a class="btn btn-outline-primary btn-sm mb-3"
+                 href="https://www.google.com/maps?q=Rozendaal+9,+2801+XS+Gouda"
+                 target="_blank" rel="noopener">Open in Google Maps</a>
+            </div>
+            <div class="ratio ratio-16x9">
+              <iframe
+                title="Kaart Fysiosport Rozendaal – Rozendaal 9"
+                src="https://www.google.com/maps?q=Rozendaal+9,+2801+XS+Gouda&output=embed"
+                style="border:0;" allowfullscreen loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <div data-include="/partials/footer.html"></div>
+
+  <!-- JS -->
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/partials.js" defer></script>
+
+  <script type="module">
+    // Client-side validatie + submit
+    const form      = document.getElementById('contactForm');
+    const alertBox  = document.getElementById('formAlert');
+    const btnSubmit = document.getElementById('btnSubmit');
+
+    function showAlert(kind, html){
+      alertBox.className = `alert alert-${kind} mt-3`;
+      alertBox.innerHTML = html;
+      alertBox.classList.remove('d-none');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Bootstrap styling
+      form.classList.add('was-validated');
+      if (!form.checkValidity()) return;
+
+      // Honeypot
+      if (form.website && form.website.value) return;
+
+      btnSubmit.disabled = true;
+      alertBox.classList.add('d-none');
+
+      const data = {
+        name   : form.elements['name'].value.trim(),
+        email  : form.elements['email'].value.trim(),
+        phone  : form.elements['phone'].value.trim(),
+        subject: form.elements['subject'].value.trim(),
+        message: form.elements['message'].value.trim()
+      };
+
+      try {
+        // Dit verwacht een backend route /api/contact
+        const res = await fetch('/api/contact', {
+          method : 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body   : JSON.stringify(data)
+        });
+
+        // Graceful fallback: als route nog niet bestaat, open mailto
+        if (res.status === 404) {
+          const to   = 'info@fysiotherapiededoelen.nl';
+          const subj = data.subject || 'Bericht via website';
+          const body =
+`Naam: ${data.name}
+E-mail: ${data.email}
+Telefoon: ${data.phone || '-'}
+Bericht:
+${data.message}`;
+          window.location.href = `mailto:${to}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+          showAlert('info', 'We openen uw e-mailprogramma om het bericht te versturen.');
+          form.reset();
+          form.classList.remove('was-validated');
+          return;
+        }
+
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const msg = Array.isArray(payload.errors) && payload.errors.length
+            ? payload.errors.join('<br>')
+            : 'Er ging iets mis. Controleer uw invoer.';
+          showAlert('danger', msg);
+          return;
+        }
+
+        showAlert('success', payload.warn
+          ? `Bedankt! Uw bericht is opgeslagen. Let op: ${payload.warn}`
+          : 'Bedankt! We nemen zo snel mogelijk contact met u op.');
+        form.reset();
+        form.classList.remove('was-validated');
+
+      } catch (err) {
+        console.error(err);
+        showAlert('danger', 'Er ging iets mis. Probeer het later opnieuw.');
+      } finally {
+        btnSubmit.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
