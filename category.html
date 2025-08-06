@@ -81,8 +81,8 @@
       therapeuten : { title: 'Therapeuten',   desc: 'Maak kennis met ons team van fysiotherapeuten.' }
     };
 
-    // Datums tonen op kaarten? (Niet bij Behandelingen)
-    const showDates = cat !== 'service';
+    // Datums tonen op kaarten? → Alleen bij Nieuws
+    const showDates = cat === 'news';
 
     function formatDate(iso){ try {
       return new Date(iso.replace(' ', 'T')).toLocaleDateString(undefined,
