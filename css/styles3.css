@@ -374,6 +374,7 @@ header.sticky-top { z-index: 1030; }
 .topbar-link {
   color: inherit;               /* keep same color as text */
   text-decoration: none;        /* remove underline */
+  font-size: 0.85rem;
 }
 
 .topbar-link:hover {
