@@ -362,3 +362,20 @@ header.sticky-top{
     margin-bottom: 0.25rem;       /* small gap before link */
   }
 }
+
+/* Let the sticky header behave as if it's at the top-level */
+.include-navbar { display: contents; }
+
+/* Safety: make sure sticky wins z-order */
+header.sticky-top { z-index: 1030; }
+
+
+/* Topbar link styling */
+.topbar-link {
+  color: inherit;               /* keep same color as text */
+  text-decoration: none;        /* remove underline */
+}
+
+.topbar-link:hover {
+  text-decoration: underline;   /* underline only on hover */
+}
