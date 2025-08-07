@@ -368,3 +368,14 @@ header.sticky-top{
 
 /* Safety: make sure sticky wins z-order */
 header.sticky-top { z-index: 1030; }
+
+
+/* Topbar link styling */
+.topbar-link {
+  color: inherit;               /* keep same color as text */
+  text-decoration: none;        /* remove underline */
+}
+
+.topbar-link:hover {
+  text-decoration: underline;   /* underline only on hover */
+}
