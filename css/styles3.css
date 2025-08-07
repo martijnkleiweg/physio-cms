@@ -340,3 +340,25 @@ header.sticky-top{
   background-color:var(--primary-color);
   color:#fff;
 }
+
+/* Better spacing between heading and link on small screens */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* allow wrapping on narrow viewports */
+}
+
+.section-head h2 {
+  margin-bottom: 0; /* desktop default */
+}
+
+@media (max-width: 576px) {
+  .section-head {
+    flex-direction: column;       /* stack vertically on mobile */
+    align-items: flex-start;      /* align left */
+  }
+  .section-head h2 {
+    margin-bottom: 0.25rem;       /* small gap before link */
+  }
+}
