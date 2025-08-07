@@ -15,9 +15,27 @@ async function loadPartials() {
     }
   }));
 
-  // Set current year in any injected footer(s)
+  // Year in footer(s)
   const y = String(new Date().getFullYear());
   document.querySelectorAll('.js-year').forEach(el => { el.textContent = y; });
+
+  // Offset sticky navbar by top-bar height
+  function setStickyOffset(){
+    const topbar = document.querySelector('.js-topbar');
+    const header = document.querySelector('header.sticky-top');
+    if (!header) return;
+    const h = topbar ? topbar.getBoundingClientRect().height : 0;
+    header.style.top = h ? `${h}px` : '0';
+    header.style.position = 'sticky'; // just in case
+  }
+
+  // run now, after render, and on resize (debounced)
+  setStickyOffset();
+  requestAnimationFrame(setStickyOffset);
+  window.addEventListener('resize', (() => {
+    let t; return () => { clearTimeout(t); t = setTimeout(setStickyOffset, 100); };
+  })());
+
 
   // Wire off-canvas menu links to navigate after the menu fully closes
   initOffcanvasNav();
