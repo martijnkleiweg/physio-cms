@@ -1,7 +1,8 @@
 /* -----------------------------------------------------------
    server.js – Physio CMS
-   • posts  (blog / behandelingen / nieuws)
+   • posts         (blog / behandelingen / nieuws)
    • appointments  (“Maak een afspraak”-formulier)
+   • contact       (contactformulier)
 ----------------------------------------------------------- */
 
 require('dotenv').config();               // load .env if present
@@ -50,50 +51,47 @@ app.get('/api/posts/:slug', (req, res) => {
 });
 
 /* ===========================================================
-   PUBLIC API – APPOINTMENTS
+   SHARED: MAILER
 =========================================================== */
-
-/* --- basic IP-rate-limit: max 3 requests / 10 min per IP --- */
-const apptLimiter = rateLimit({
-  windowMs : 10 * 60 * 1000,   // 10 min
-  max      : 3,
-  message  : { error: 'Te veel aanvragen – probeer het later opnieuw.' }
-});
-
-/* --- helpers for env parsing --- */
 function envBool(v, def=false){
   if (v === undefined) return def;
   const s = String(v).trim().toLowerCase();
   return s === '1' || s === 'true' || s === 'yes';
 }
 
-/* --- mail transporter (SMTP env or console fallback) --- */
 const hasSMTP = !!process.env.SMTP_HOST;
 
 const transporter = hasSMTP
   ? nodemailer.createTransport({
       host      : process.env.SMTP_HOST,
       port      : Number(process.env.SMTP_PORT || 587),
-      // secure = true only for implicit TLS (usually port 465). For STARTTLS (587), keep false.
+      // secure=true only for implicit TLS (port 465). For STARTTLS on 587 keep false.
       secure    : envBool(process.env.SMTP_SECURE, false),
       auth      : (process.env.SMTP_USER && process.env.SMTP_PASS)
                   ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
                   : undefined,
-      requireTLS: true,                  // good default on 587
+      requireTLS: true,
       tls       : { minVersion: 'TLSv1.2' }
     })
   : { sendMail: opts => { console.log('[dev-mail]', opts); return Promise.resolve(); } };
 
-/* Verify SMTP at boot so misconfig shows up clearly in logs */
 if (hasSMTP) {
   transporter.verify((err) => {
-    if (err) {
-      console.error('[mail] SMTP verify failed:', err);
-    } else {
-      console.log('[mail] SMTP connection OK');
-    }
+    if (err) console.error('[mail] SMTP verify failed:', err);
+    else     console.log('[mail] SMTP connection OK');
   });
 }
+
+/* ===========================================================
+   PUBLIC API – APPOINTMENTS
+=========================================================== */
+
+/* --- IP-rate-limit: max 3 requests / 10 min per IP --- */
+const apptLimiter = rateLimit({
+  windowMs : 10 * 60 * 1000,
+  max      : 3,
+  message  : { error: 'Te veel aanvragen – probeer het later opnieuw.' }
+});
 
 app.post('/api/appointments', apptLimiter, async (req, res) => {
   const { name='', email='', phone='', date='', period='', message='' } = req.body || {};
@@ -108,13 +106,13 @@ app.post('/api/appointments', apptLimiter, async (req, res) => {
 
   if (errors.length) return res.status(400).json({ errors });
 
-  /* --- save in DB --- */
+  // save
   db.saveAppointment({
     name, email, phone, date, period: period.toLowerCase(), message,
     ip: req.ip
   });
 
-  /* --- mail notificatie --- */
+  // email
   const mailTo   = process.env.MAIL_TO   || 'you@example.com';
   const mailFrom = process.env.MAIL_FROM || process.env.SMTP_USER || `no-reply@${process.env.DOMAIN || 'localhost'}`;
 
@@ -122,7 +120,7 @@ app.post('/api/appointments', apptLimiter, async (req, res) => {
     await transporter.sendMail({
       from   : mailFrom,
       to     : mailTo,
-      replyTo: email, // so you can reply directly to the requester
+      replyTo: email,
       subject: `Nieuwe afspraak: ${name} op ${date} (${period})`,
       text   : `
 Naam     : ${name}
@@ -136,8 +134,63 @@ IP       : ${req.ip}
     });
   } catch (err) {
     console.error('Mail failed:', err);
-    // Afspraak staat al in DB; stuur 200 met waarschuwing
     return res.status(200).json({ ok:true, warn:'Afspraak opgeslagen, maar e-mail kon niet worden verzonden.' });
+  }
+
+  res.json({ ok:true });
+});
+
+/* ===========================================================
+   PUBLIC API – CONTACT (NEW)
+=========================================================== */
+
+/* --- IP-rate-limit: max 5 requests / 10 min per IP --- */
+const contactLimiter = rateLimit({
+  windowMs : 10 * 60 * 1000,
+  max      : 5,
+  message  : { error: 'Te veel berichten – probeer het later opnieuw.' }
+});
+
+app.post('/api/contact', contactLimiter, async (req, res) => {
+  const { name='', email='', phone='', subject='', message='' } = req.body || {};
+  const errors = [];
+
+  if (!name.trim())                              errors.push('Naam is verplicht.');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errors.push('Ongeldig e-mailadres.');
+  if (!message || message.trim().length < 5)     errors.push('Bericht is te kort.');
+
+  if (errors.length) return res.status(400).json({ errors });
+
+  // save
+  db.saveContact({
+    name, email, phone, subject, message,
+    ip: req.ip
+  });
+
+  // email
+  const mailTo   = process.env.MAIL_TO   || 'you@example.com';
+  const mailFrom = process.env.MAIL_FROM || process.env.SMTP_USER || `no-reply@${process.env.DOMAIN || 'localhost'}`;
+
+  try {
+    await transporter.sendMail({
+      from   : mailFrom,
+      to     : mailTo,
+      replyTo: email,
+      subject: subject ? `[Contact] ${subject}` : '[Contact] Bericht via website',
+      text   : `
+Naam     : ${name}
+E-mail   : ${email}
+Telefoon : ${phone || '-'}
+Onderwerp: ${subject || '-'}
+Bericht  :
+${message}
+
+IP       : ${req.ip}
+`.trim()
+    });
+  } catch (err) {
+    console.error('Mail failed (contact):', err);
+    return res.status(200).json({ ok:true, warn:'Bericht opgeslagen, maar e-mail kon niet worden verzonden.' });
   }
 
   res.json({ ok:true });
@@ -152,71 +205,27 @@ app.use('/admin', basicAuth({
   realm     : 'PhysioCMS'
 }));
 
-/* ===========================================================
-   ADMIN – VIEW APPOINTMENTS
-   (Place BEFORE the '/admin/:slug' catch-all!)
-=========================================================== */
-
-/* HTML page (needs views/appointments.ejs) */
-app.get('/admin/appointments', (req, res) => {
-  res.render('appointments');
-});
-
-/* JSON feed for table */
-app.get('/admin/api/appointments', (req, res) => {
-  try {
-    const rows = db.allAppointments();
-    res.json(rows);
-  } catch (e) {
-    console.error('appointments list error:', e);
-    res.status(500).json({ error: 'Kon afspraken niet laden.' });
-  }
-});
-
-/* CSV export */
-app.get('/admin/appointments.csv', (req, res) => {
-  try {
-    const rows = db.allAppointments();
-    const header = ['id','created_at','name','email','phone','date','period','message','ip'];
-    const esc = v => {
-      const s = (v ?? '').toString();
-      return `"${s.replace(/"/g, '""')}"`;
-    };
-    const csv = [
-      header.join(','),
-      ...rows.map(r => header.map(k => esc(r[k])).join(','))
-    ].join('\r\n');
-
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="appointments.csv"');
-    res.send('\uFEFF' + csv); // BOM for Excel
-  } catch (e) {
-    console.error('appointments csv error:', e);
-    res.status(500).send('Kon CSV niet genereren.');
-  }
-});
-
-/* Delete one appointment by ID */
-app.delete('/admin/appointments/:id', (req, res) => {
-  try {
-    const id = Number(req.params.id);
-    if (!Number.isFinite(id)) return res.status(400).json({ error: 'Ongeldige ID' });
-    db.deleteAppointment(id);
-    res.json({ ok: true });
-  } catch (e) {
-    console.error('appointments delete error:', e);
-    res.status(500).json({ error: 'Verwijderen mislukt.' });
-  }
-});
-
 /* ---------- editor UI ---------- */
 app.get('/admin',       (_ ,res) => res.render('editor', { post: null }));
-
-/* Keep this AFTER the appointments routes so it doesn't swallow them */
 app.get('/admin/:slug', (req,res) => {
   const post = db.findPost(req.params.slug);
   if (!post) return res.redirect('/admin');
   res.render('editor', { post });
+});
+
+/* Simple list of appointments (JSON) for the appointments admin page */
+app.get('/admin/api/appointments', (_req, res) => {
+  try {
+    res.json(db.allAppointments());
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Kon afspraken niet laden' });
+  }
+});
+
+/* Appointments admin page (EJS) */
+app.get('/admin/appointments', (_req, res) => {
+  res.render('appointments');
 });
 
 /* ===========================================================
@@ -225,7 +234,6 @@ app.get('/admin/:slug', (req,res) => {
 app.post('/admin/save', (req, res) => {
   const p = { ...req.body };
 
-  // normaliseren
   p.published = p.published ? 1 : 0;
   p.featured  = p.featured  ? 1 : 0;
   p.category  = p.category  || 'news';
@@ -248,8 +256,6 @@ app.delete('/admin/:slug', (req,res) => {
 /* ===========================================================
    IMAGE UPLOADS
 =========================================================== */
-
-/* --- featured image (hero + card) --- */
 app.post('/admin/upload', upload.single('file'), async (req, res) => {
   try {
     const srcPath  = req.file.path;
@@ -283,7 +289,7 @@ app.post('/admin/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-/* --- inline image for EasyMDE (800px wide) --- */
+/* inline image upload (EasyMDE body images) */
 app.post('/admin/upload-inline', upload.single('file'), async (req,res) => {
   try {
     const srcPath  = req.file.path;
@@ -302,7 +308,6 @@ app.post('/admin/upload-inline', upload.single('file'), async (req,res) => {
     res.status(500).json({ error: 'Inline upload failed' });
   }
 });
-
 
 /* ===========================================================
    START SERVER
