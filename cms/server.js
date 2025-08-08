@@ -5,9 +5,21 @@
    • contact       (contactformulier)
 ----------------------------------------------------------- */
 
-require('dotenv').config();               // load .env if present
-const express     = require('express');
 const path        = require('path');
+
+// Load .env from the same directory as this file and make it win
+try {
+  const dotenv = require('dotenv');
+  const res = dotenv.config({ path: path.join(__dirname, '.env') });
+  if (res && res.parsed && typeof res.parsed.ADMIN_PW === 'string') {
+    // Force .env to override any pre-set env (PM2/systemd/Docker)
+    process.env.ADMIN_PW = res.parsed.ADMIN_PW;
+  }
+} catch (e) {
+  console.warn('[env] dotenv not loaded:', e.message);
+}
+
+const express     = require('express');
 const fs          = require('fs');
 const cors        = require('cors');
 const marked      = require('marked');
@@ -199,8 +211,17 @@ IP       : ${req.ip}
 /* ===========================================================
    ADMIN AREA (basic-auth)
 =========================================================== */
+const ADMIN_PW = process.env.ADMIN_PW;
+if (!ADMIN_PW) {
+  console.error('[auth] ADMIN_PW missing – set it in .env or the environment');
+  process.exit(1);
+}
+
+// (Optional tiny debug – remove later)
+// console.log('[auth] ADMIN_PW prefix=', ADMIN_PW.slice(0,2), 'len=', ADMIN_PW.length);
+
 app.use('/admin', basicAuth({
-  users     : { editor: process.env.ADMIN_PW || 'Doelen@93' },
+  users     : { editor: ADMIN_PW },
   challenge : true,
   realm     : 'PhysioCMS'
 }));
