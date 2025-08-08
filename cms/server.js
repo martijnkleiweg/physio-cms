@@ -200,7 +200,7 @@ IP       : ${req.ip}
    ADMIN AREA (basic-auth)
 =========================================================== */
 app.use('/admin', basicAuth({
-  users     : { editor: process.env.ADMIN_PW || 'ChangeMe123' },
+  users     : { editor: process.env.ADMIN_PW || 'Doelen@93' },
   challenge : true,
   realm     : 'PhysioCMS'
 }));
