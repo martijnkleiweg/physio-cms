@@ -363,11 +363,9 @@ header.sticky-top{
   }
 }
 
-/* Let the sticky header behave as if it's at the top-level */
-.include-navbar { display: contents; }
-
 /* Safety: make sure sticky wins z-order */
-header.sticky-top { z-index: 1030; }
+header.sticky-top { position: sticky; top: 0; z-index: 1030; }
+
 
 
 /* Topbar link styling */

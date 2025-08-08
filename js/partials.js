@@ -8,7 +8,10 @@ async function loadPartials() {
     try {
       const res = await fetch(url, { cache: 'no-cache' });
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-      el.innerHTML = await res.text();
+      const html = await res.text();
+      const tpl = document.createElement('template');
+      tpl.innerHTML = html;
+      el.replaceWith(tpl.content.cloneNode(true));
     } catch (e) {
       console.error('Partial load failed:', url, e);
       el.outerHTML = `<!-- failed to load ${url} -->`;
@@ -24,9 +27,16 @@ async function loadPartials() {
     const topbar = document.querySelector('.js-topbar');
     const header = document.querySelector('header.sticky-top');
     if (!header) return;
-    const h = topbar ? topbar.getBoundingClientRect().height : 0;
-    header.style.top = h ? `${h}px` : '0';
-    header.style.position = 'sticky'; // just in case
+
+    let top = 0;
+    if (topbar) {
+      const pos = getComputedStyle(topbar).position;
+      if (pos === 'fixed' || pos === 'sticky') {
+        top = Math.round(topbar.getBoundingClientRect().height);
+      }
+    }
+    header.style.top = `${top}px`;
+    header.style.position = 'sticky'; // belt & suspenders
   }
 
   // run now, after render, and on resize (debounced)
