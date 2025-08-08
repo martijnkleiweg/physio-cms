@@ -5,9 +5,7 @@
    • contact       (contactformulier)
 ----------------------------------------------------------- */
 
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env'), override: true });
-// load .env if present
+require('dotenv').config();               // load .env if present
 const express     = require('express');
 const path        = require('path');
 const fs          = require('fs');
@@ -201,15 +199,11 @@ IP       : ${req.ip}
 /* ===========================================================
    ADMIN AREA (basic-auth)
 =========================================================== */
-const ADMIN_PW = process.env.ADMIN_PW;
-if (!ADMIN_PW) { throw new Error('ADMIN_PW missing'); }
-
 app.use('/admin', basicAuth({
-  users: { editor: ADMIN_PW },
-  challenge: true,
-  realm: 'PhysioCMS'
+  users     : { editor: process.env.ADMIN_PW || 'Doelen@93' },
+  challenge : true,
+  realm     : 'PhysioCMS'
 }));
-
 
 /* ---------- editor UI ---------- */
 app.get('/admin',       (_ ,res) => res.render('editor', { post: null }));
