@@ -7,7 +7,7 @@ It combines a static front-end (HTML/CSS/JS) with a Node.js/Express backend to m
 
 ## Features
 
-- 🖥️ **Public website** with pages:
+- **Public website** with pages:
   - Home (`index.html`)
   - Over ons (`overons.html`)
   - Afspraak maken (`afspraak.html`)
@@ -15,14 +15,14 @@ It combines a static front-end (HTML/CSS/JS) with a Node.js/Express backend to m
   - Blog/news categories (`category.html`)
   - Single posts (`post.html`)
 
-- 🔐 **Admin CMS**:
+- **Admin CMS**:
   - Login-protected dashboard
   - Create, edit, and delete articles/posts
   - View and manage appointment requests
   - Reusable partials (`partials/`) with EJS templating
   - Runs under `/admin` (reverse-proxied in production)
 
-- 📱 **Responsive design** with Bootstrap and custom CSS  
+- **Responsive design** with Bootstrap and custom CSS  
 - ⚡ Lightweight — no build step required
 
 ---
@@ -111,7 +111,7 @@ physio-cms/
 
 ## License
 
-No license file currently in the repository — contributions default to “all rights reserved” by the author.  
-Add a `LICENSE` (e.g., MIT) if you want to open-source it.
+All rights reserved by the author.  
+
 
 ---
