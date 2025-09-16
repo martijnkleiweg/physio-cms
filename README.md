@@ -44,8 +44,8 @@ It combines a static front-end (HTML/CSS/JS) with a Node.js/Express backend to m
    ```ini
    PORT=3000
    SESSION_SECRET=your-secret
-   ADMIN_USER=editor
-   ADMIN_PASS=ChangeMe123
+   ADMIN_USER=user
+   ADMIN_PASS=password
    ```
 
 4. Start the app
