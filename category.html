@@ -78,11 +78,12 @@
     const CAT_LABELS = {
       news        : { title: 'Nieuws',        desc: 'Updates en mededelingen uit onze praktijk.' },
       service     : { title: 'Behandelingen', desc: 'Behandelingen en programma’s die wij aanbieden.' },
-      therapeuten : { title: 'Therapeuten',   desc: 'Maak kennis met ons team van fysiotherapeuten.' }
+      therapeuten : { title: 'Therapeuten',   desc: 'Maak kennis met ons team van fysiotherapeuten.' },
+      fitness     : { title: 'Fitness',       desc: 'Beweegprogramma’s, training en (fysio)fitness informatie.' }
     };
 
     // Datums tonen op kaarten? → Alleen bij Nieuws
-    const showDates = cat === 'news';
+    const showDates = !['service','therapeuten','fitness'].includes(cat); 
 
     function formatDate(iso){ try {
       return new Date(iso.replace(' ', 'T')).toLocaleDateString(undefined,

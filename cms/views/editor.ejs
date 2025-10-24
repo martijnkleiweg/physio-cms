@@ -39,9 +39,10 @@
       <label class="form-label fw-semibold">Categorie</label>
       <% const cat = post ? post.category : 'news'; %>
       <select class="form-select" name="category">
-        <option value="news"    <%= cat==='news'    ? 'selected' : '' %>>Nieuws</option>
-        <option value="service" <%= cat==='service' ? 'selected' : '' %>>Behandelingen</option>
+        <option value="news"        <%= cat==='news'        ? 'selected' : '' %>>Nieuws</option>
+        <option value="service"     <%= cat==='service'     ? 'selected' : '' %>>Behandelingen</option>
         <option value="therapeuten" <%= cat==='therapeuten' ? 'selected' : '' %>>Therapeuten</option>
+        <option value="fitness"     <%= cat==='fitness'     ? 'selected' : '' %>>Fitness</option> <!-- NEW -->
       </select>
     </div>
 
