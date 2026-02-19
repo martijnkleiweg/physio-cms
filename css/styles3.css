@@ -390,3 +390,91 @@ header.sticky-top { position: sticky; top: 0; z-index: 1030; }
 .topbar-link:hover {
   text-decoration: underline;   /* underline only on hover */
 }
+
+
+
+
+.affiliations .tile{
+  background:#fff;
+  border:1px solid #eef2f7;
+  border-radius:.5rem;
+  padding:1rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  height:100%;
+  transition:box-shadow .2s ease;
+}
+
+/* ================================================================
+   OVER ONS page
+   ================================================================ */
+
+/* fixed logo container */
+.affiliations .logo-box{
+  width:100%;
+  aspect-ratio: 1 / 1;          /* makes perfect square */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:#fff;
+  margin-bottom:.5rem;
+}
+
+/* normalize logos */
+.affiliations .logo-box img{
+  max-width:90%;
+  max-height:90%;
+  object-fit:contain;           /* keeps full logo visible */
+}
+
+/* links */
+
+.affiliations a {
+color: inherit;          /* use normal text color */
+text-decoration: none;   /* remove link underline */
+}
+
+.affiliations a:hover {
+color: inherit;          /* prevent blue on hover */
+}
+
+/* === Affiliations: grayscale → color on hover, subtle zoom, soft elevation === */
+
+.affiliations .tile{
+transition: box-shadow .25s ease, transform .25s ease;
+}
+
+.affiliations .logo-box img{
+filter: grayscale(100%);
+opacity: .9;
+transform: scale(.96);                 /* slightly smaller by default */
+transition: filter .25s ease, opacity .25s ease, transform .25s ease;
+will-change: transform, filter;
+}
+
+/* Hover / focus (keyboard-friendly) */
+.affiliations .tile:hover,
+.affiliations .tile:focus-visible{
+box-shadow: 0 .75rem 1.25rem rgba(0,0,0,.10);  /* soft elevation */
+transform: translateY(-2px);                    /* tiny lift */
+}
+
+.affiliations .tile:hover .logo-box img,
+.affiliations .tile:focus-visible .logo-box img{
+filter: grayscale(0%);
+opacity: 1;
+transform: scale(1.00);                         /* subtle zoom-in */
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce){
+.affiliations .tile,
+.affiliations .logo-box img{
+  transition: none !important;
+  transform: none !important;
+}
+}
