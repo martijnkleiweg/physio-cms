@@ -22,15 +22,38 @@
 
   <!-- Page-scoped helper-CSS voor affiliatie-tegels -->
   <style>
-    .affiliations .tile{
-      background:#fff;border:1px solid #eef2f7;border-radius:.5rem;
-      padding:1rem;display:flex;flex-direction:column;align-items:center;
-      justify-content:center;text-align:center;height:100%;
-      transition:box-shadow .2s ease;
-    }
-    .affiliations .tile:hover{box-shadow:0 .5rem 1rem rgba(0,0,0,.08);}
-    .affiliations img{max-height:60px;width:auto;}
-    .affiliations .name{font-size:.95rem;margin-top:.5rem;color:#212529;}
+  .affiliations .tile{
+    background:#fff;
+    border:1px solid #eef2f7;
+    border-radius:.5rem;
+    padding:1rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    height:100%;
+    transition:box-shadow .2s ease;
+  }
+
+  /* fixed logo container */
+  .affiliations .logo-box{
+    width:100%;
+    aspect-ratio: 1 / 1;          /* makes perfect square */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:#fff;
+    margin-bottom:.5rem;
+  }
+
+  /* normalize logos */
+  .affiliations .logo-box img{
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;           /* keeps full logo visible */
+  }
   </style>
 </head>
 <body>
@@ -127,42 +150,84 @@
     <!-- Affiliations -->
     <section class="mb-5 affiliations">
       <h2 class="h4 mb-4">Wij zijn aangesloten bij</h2>
+
       <div class="row g-3 g-md-4">
 
-        <!-- SNGH -->
+        <!-- Schoudernetwerk Groene Hart -->
         <div class="col-6 col-md-3">
-          <a class="tile d-block text-decoration-none" href="https://www.sngh.nl" target="_blank" rel="noopener noreferrer" aria-label="Schoudernetwerk Groene Hart (opent in nieuw tabblad)">
-            <img src="https://www.sngh.nl/media/theme/logo.jpg" alt="Schoudernetwerk Groene Hart" loading="lazy">
+          <a class="tile d-block text-decoration-none"
+             href="https://www.sngh.nl"
+             target="_blank"
+             rel="noopener noreferrer"
+             aria-label="Schoudernetwerk Groene Hart (opent in nieuw tabblad)">
+
+            <div class="logo-box">
+              <img src="/images/sn-groenehart.jpg"
+                   alt="Schoudernetwerk Groene Hart"
+                   loading="lazy">
+            </div>
+
             <div class="name">Schoudernetwerk Groene&nbsp;Hart</div>
           </a>
         </div>
 
-        <!-- Chronisch ZorgNet -->
+        <!-- KNGF -->
         <div class="col-6 col-md-3">
-          <a class="tile d-block text-decoration-none" href="https://www.chronischzorgnet.nl/aandoeningen/overzicht" target="_blank" rel="noopener noreferrer" aria-label="Chronisch ZorgNet (opent in nieuw tabblad)">
-            <img src="https://a.storyblok.com/f/146600/x/c5d522792a/chronisch-zorgnet-mobile.svg" alt="Chronisch ZorgNet" loading="lazy">
-            <div class="name">Chronisch ZorgNet</div>
+          <a class="tile d-block text-decoration-none"
+             href="https://www.kngf.nl/"
+             target="_blank"
+             rel="noopener noreferrer"
+             aria-label="KNGF (opent in nieuw tabblad)">
+
+            <div class="logo-box">
+              <img src="/images/kngflogo.jpg"
+                   alt="KNGF"
+                   loading="lazy">
+            </div>
+
+            <div class="name">KNGF</div>
           </a>
         </div>
 
         <!-- NVMT -->
         <div class="col-6 col-md-3">
-          <a class="tile d-block text-decoration-none" href="https://www.kngf.nl/bi/nvmt/" target="_blank" rel="noopener noreferrer" aria-label="Nederlandse Vereniging voor Manuele Therapie (opent in nieuw tabblad)">
-            <img src="https://www.kngf.nl/app/uploads/2024/07/nvmt_merk_nw-rgb-XL.png" alt="NVMT" loading="lazy" style="max-height:54px">
+          <a class="tile d-block text-decoration-none"
+             href="https://www.kngf.nl/bi/nvmt/"
+             target="_blank"
+             rel="noopener noreferrer"
+             aria-label="Nederlandse Vereniging voor Manuele Therapie (opent in nieuw tabblad)">
+
+            <div class="logo-box">
+              <img src="/images/nvmt_logo.jpg"
+                   alt="Nederlandse Vereniging voor Manuele Therapie"
+                   loading="lazy">
+            </div>
+
             <div class="name">Vereniging&nbsp;voor&nbsp;Manuele Therapie</div>
           </a>
         </div>
 
         <!-- FysOptima -->
         <div class="col-6 col-md-3">
-          <a class="tile d-block text-decoration-none" href="https://www.fysoptima.nl/" target="_blank" rel="noopener noreferrer" aria-label="FysOptima (opent in nieuw tabblad)">
-            <img src="https://www.fysoptima.nl/wp-content/uploads/2023/06/image.png" alt="FysOptima" loading="lazy" style="max-height:50px">
+          <a class="tile d-block text-decoration-none"
+             href="https://www.fysoptima.nl/"
+             target="_blank"
+             rel="noopener noreferrer"
+             aria-label="FysOptima (opent in nieuw tabblad)">
+
+            <div class="logo-box">
+              <img src="/images/fysoptimalogo.jpg"
+                   alt="FysOptima"
+                   loading="lazy">
+            </div>
+
             <div class="name">FysOptima</div>
           </a>
         </div>
 
       </div>
     </section>
+
 
     <!-- Contact & Locaties -->
     <section class="mb-5">
