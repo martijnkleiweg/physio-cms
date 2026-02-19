@@ -391,23 +391,6 @@ header.sticky-top { position: sticky; top: 0; z-index: 1030; }
   text-decoration: underline;   /* underline only on hover */
 }
 
-
-
-
-.affiliations .tile{
-  background:#fff;
-  border:1px solid #eef2f7;
-  border-radius:.5rem;
-  padding:1rem;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  height:100%;
-  transition:box-shadow .2s ease;
-}
-
 /* ================================================================
    OVER ONS page – Affiliations tiles
    ================================================================ */
@@ -417,7 +400,7 @@ header.sticky-top { position: sticky; top: 0; z-index: 1030; }
   background:#fff;
   border:1px solid #eef2f7;
   border-radius:.5rem;
-  padding:1rem;
+  padding:.85rem;                 /* slightly tighter */
   height:100%;
 
   display:flex;
@@ -426,7 +409,6 @@ header.sticky-top { position: sticky; top: 0; z-index: 1030; }
   justify-content:flex-start;
   text-align:center;
 
-  /* subtle polish */
   transition: box-shadow .2s ease, transform .2s ease;
 }
 
@@ -448,13 +430,15 @@ header.sticky-top { position: sticky; top: 0; z-index: 1030; }
   justify-content:center;
   overflow:hidden;
   background:#fff;
-  margin-bottom:.75rem;
+
+  padding:.35rem;                 /* reduce "too much white" feel */
+  margin-bottom:.5rem;            /* tighter spacing */
 }
 
-/* Normalize logo sizing (smaller than full box) */
+/* Normalize logo sizing (fills box more) */
 .affiliations .logo-box img{
-  max-width: 75%;
-  max-height: 75%;
+  max-width: 88%;
+  max-height: 88%;
   object-fit: contain;
   opacity: .95;
   transform: scale(1);
@@ -466,8 +450,8 @@ header.sticky-top { position: sticky; top: 0; z-index: 1030; }
 .affiliations .name{
   font-size:.95rem;
   line-height:1.2;
-  margin-top:auto;           /* pins label to bottom for equal-height tiles */
-  min-height:2.4em;          /* reserves space for up to ~2 lines */
+  margin-top:auto;
+  min-height:2.4em;               /* space for ~2 lines */
   word-break: break-word;
   hyphens: auto;
   color:#212529;
@@ -486,7 +470,7 @@ header.sticky-top { position: sticky; top: 0; z-index: 1030; }
   opacity: 1;
 }
 
-/* Keyboard focus ring (nice accessibility) */
+/* Keyboard focus ring */
 .affiliations .tile:focus-visible{
   outline: 2px solid rgba(0,102,204,.35);
   outline-offset: 3px;
