@@ -245,6 +245,18 @@ header.sticky-top{
 .hero-banner .overlay { position:absolute; inset:0; background: transparent; }
 .hero-banner .container { position:relative; z-index:2; }
 
+/* Make all images inside article body responsive */
+#articleContent img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Optional: keep them from touching edges and center them */
+#articleContent img {
+  margin: 1rem auto;
+}
+
 /* ================================================================
    CARDS & IMAGES – unified across home + category
    ================================================================ */
