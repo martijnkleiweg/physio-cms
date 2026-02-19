@@ -60,6 +60,13 @@ const apptLimiter = rateLimit({
   message  : { error: 'Te veel aanvragen – probeer het later opnieuw.' }
 });
 
+/* --- basic IP-rate-limit for contactform: max 5 requests / 10 min per IP --- */
+const contactLimiter = rateLimit({
+  windowMs : 10 * 60 * 1000,
+  max      : 5,
+  message  : { error: 'Te veel berichten – probeer het later opnieuw.' }
+});
+
 /* --- helpers for env parsing --- */
 function envBool(v, def=false){
   if (v === undefined) return def;
@@ -94,6 +101,56 @@ if (hasSMTP) {
     }
   });
 }
+
+/* ===========================================================
+   CONTACT FORM
+=========================================================== */
+
+app.post('/api/contact', contactLimiter, async (req, res) => {
+  const { name='', email='', phone='', subject='', message='' } = req.body || {};
+  const errors = [];
+
+  if (!name.trim())                              errors.push('Naam is verplicht.');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errors.push('Ongeldig e-mailadres.');
+  if (!message.trim())                           errors.push('Bericht is verplicht.');
+  // subject optional; phone optional (your client treats it as optional)
+  // if you want phone required, uncomment:
+  // if (!phone.trim()) errors.push('Telefoonnummer is verplicht.');
+
+  if (errors.length) return res.status(400).json({ errors });
+
+  const mailTo   = process.env.MAIL_TO   || 'info@fysiotherapiededoelen.nl';
+  const mailFrom = process.env.MAIL_FROM || process.env.SMTP_USER || `no-reply@${process.env.DOMAIN || 'localhost'}`;
+
+  try {
+    await transporter.sendMail({
+      from   : mailFrom,
+      to     : mailTo,
+      replyTo: email,
+      subject: subject?.trim() ? `Contact: ${subject.trim()}` : 'Contactbericht via website',
+      text   : `
+Naam     : ${name}
+E-mail   : ${email}
+Telefoon : ${phone || '-'}
+Onderwerp: ${subject || '-'}
+Bericht  :
+${message}
+
+IP       : ${req.ip}
+`.trim()
+    });
+  } catch (err) {
+    console.error('Contact mail failed:', err);
+    return res.status(500).json({ errors: ['Bericht kon niet worden verzonden. Probeer het later opnieuw.'] });
+  }
+
+  res.json({ ok: true });
+});
+
+
+/* ===========================================================
+   APPOINTMENT FORM
+=========================================================== */
 
 app.post('/api/appointments', apptLimiter, async (req, res) => {
   const { name='', email='', phone='', date='', period='', message='' } = req.body || {};
