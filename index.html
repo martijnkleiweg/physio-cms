@@ -63,6 +63,18 @@
     </div>
   </section>
 
+  <!-- ===== THERAPEUTEN (dynamic) ====================================== -->
+  <section id="therapeuten" class="py-5">
+    <div class="container">
+      <div class="section-head">
+        <h2>Therapeuten</h2>
+        <a href="category.html?category=therapeuten" class="view-all">Alle therapeuten →</a>
+      </div>
+      <div id="therapeutenRow" class="row g-4"></div>
+    </div>
+  </section>
+
+
   <!-- ===== FOOTER / MISC ============================================= -->
   <div data-include="/partials/footer.html"></div>
 
@@ -171,8 +183,9 @@
 
       const posts = await getPosts();
 
-      const services = pickHomepage(posts, 'service', 3);
-      const news     = pickHomepage(posts, 'news',    3);
+      const services     = pickHomepage(posts, 'service',     3);
+      const news         = pickHomepage(posts, 'news',        3);
+      const therapeuten  = pickHomepage(posts, 'therapeuten', 3);
 
       qs('#servicesRow').innerHTML =
         services.map(card).join('') || '<p class="text-muted">Er zijn nog geen behandelingen beschikbaar.</p>';
@@ -180,8 +193,13 @@
       qs('#newsRow').innerHTML =
         news.map(card).join('') || '<p class="text-muted">Er is nog geen nieuws.</p>';
 
-      if (services.length) pushItemListJsonLd("#services", services);
-      if (news.length)     pushItemListJsonLd("#news", news);
+      qs('#therapeutenRow').innerHTML =
+        therapeuten.map(card).join('') || '<p class="text-muted">Er zijn nog geen therapeuten beschikbaar.</p>';
+
+      if (services.length)    pushItemListJsonLd("#services", services);
+      if (news.length)        pushItemListJsonLd("#news", news);
+      if (therapeuten.length) pushItemListJsonLd("#therapeuten", therapeuten);
+
     })();
   </script>
 </body>
