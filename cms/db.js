@@ -31,9 +31,13 @@ CREATE TABLE IF NOT EXISTS posts (
 `);
 
 function addColumnIfMissing(sql) {
-  try { db.exec(sql); }
-  catch (e) { if (!/duplicate column name/i.test(e.message)) throw e; }
+  try {
+    db.exec(sql);
+  } catch (e) {
+    if (!/duplicate column name/i.test(e.message)) throw e;
+  }
 }
+
 addColumnIfMissing(`ALTER TABLE posts ADD COLUMN image_url TEXT DEFAULT ''`);
 addColumnIfMissing(`ALTER TABLE posts ADD COLUMN hero_url  TEXT DEFAULT ''`);
 addColumnIfMissing(`ALTER TABLE posts ADD COLUMN hero_pos  TEXT DEFAULT 'center'`);
@@ -41,16 +45,48 @@ addColumnIfMissing(`ALTER TABLE posts ADD COLUMN featured  INTEGER DEFAULT 0`);
 addColumnIfMissing(`ALTER TABLE posts ADD COLUMN published INTEGER DEFAULT 0`);
 
 const POST = {
-  all   : db.prepare(`SELECT * FROM posts ORDER BY created_at DESC`),
-  get   : db.prepare(`SELECT * FROM posts WHERE slug = ? LIMIT 1`),
+  all: db.prepare(`
+    SELECT *
+    FROM posts
+    ORDER BY created_at DESC
+  `),
+
+  get: db.prepare(`
+    SELECT *
+    FROM posts
+    WHERE slug = ?
+    LIMIT 1
+  `),
+
   insert: db.prepare(`
     INSERT INTO posts
-      (title, slug, content_md, excerpt, category,
-       image_url, hero_url, hero_pos, featured, published)
+      (
+        title,
+        slug,
+        content_md,
+        excerpt,
+        category,
+        image_url,
+        hero_url,
+        hero_pos,
+        featured,
+        published
+      )
     VALUES
-      (@title, @slug, @content_md, @excerpt, @category,
-       @image_url, @hero_url, @hero_pos, @featured, @published)
+      (
+        @title,
+        @slug,
+        @content_md,
+        @excerpt,
+        @category,
+        @image_url,
+        @hero_url,
+        @hero_pos,
+        @featured,
+        @published
+      )
   `),
+
   update: db.prepare(`
     UPDATE posts SET
       title       = @title,
@@ -65,18 +101,27 @@ const POST = {
       updated_at  = CURRENT_TIMESTAMP
     WHERE slug = @slug
   `),
-  del   : db.prepare(`DELETE FROM posts WHERE slug = ?`)
+
+  del: db.prepare(`
+    DELETE FROM posts
+    WHERE slug = ?
+  `)
 };
 
-function fillPostDefaults (p){
+function fillPostDefaults(p) {
   if (p.image_url === undefined) p.image_url = '';
   if (p.hero_url  === undefined) p.hero_url  = '';
   if (p.hero_pos  === undefined) p.hero_pos  = 'center';
   if (p.featured  === undefined) p.featured  = 0;
   if (p.published === undefined) p.published = 0;
+
   p.featured  = p.featured ? 1 : 0;
   p.published = p.published ? 1 : 0;
-  if (!['top','center','bottom'].includes(p.hero_pos)) p.hero_pos = 'center';
+
+  if (!['top', 'center', 'bottom'].includes(p.hero_pos)) {
+    p.hero_pos = 'center';
+  }
+
   return p;
 }
 
@@ -102,7 +147,17 @@ const APPOINT = {
     VALUES
       (@name, @email, @phone, @date, @period, @message, @ip)
   `),
-  all   : db.prepare(`SELECT * FROM appointments ORDER BY created_at DESC`)
+
+  all: db.prepare(`
+    SELECT *
+    FROM appointments
+    ORDER BY created_at DESC
+  `),
+
+  del: db.prepare(`
+    DELETE FROM appointments
+    WHERE id = ?
+  `)
 };
 
 /* ======================= CONTACTS ======================= */
@@ -126,42 +181,71 @@ const CONTACT = {
     VALUES
       (@name, @email, @phone, @subject, @message, @ip)
   `),
-  all   : db.prepare(`SELECT * FROM contacts ORDER BY created_at DESC`)
+
+  all: db.prepare(`
+    SELECT *
+    FROM contacts
+    ORDER BY created_at DESC
+  `)
 };
 
 /* ======================= PUBLIC API ======================= */
 module.exports = {
   /* posts */
-  allPosts ()           { return POST.all.all(); },
-  findPost (slug)       { return POST.get.get(slug); },
-  insertPost (p)        { POST.insert.run(fillPostDefaults(p)); },
-  updatePost (p)        { POST.update.run(fillPostDefaults(p)); },
-  deletePost (slug)     { POST.del.run(slug); },
+  allPosts() {
+    return POST.all.all();
+  },
+
+  findPost(slug) {
+    return POST.get.get(slug);
+  },
+
+  insertPost(p) {
+    return POST.insert.run(fillPostDefaults(p));
+  },
+
+  updatePost(p) {
+    return POST.update.run(fillPostDefaults(p));
+  },
+
+  deletePost(slug) {
+    return POST.del.run(slug);
+  },
 
   /* appointments */
-  saveAppointment (d)   {
-    APPOINT.insert.run({
-      name   : (d.name   || '').trim(),
-      email  : (d.email  || '').trim(),
-      phone  : (d.phone  || '').trim(),
-      date   : (d.date   || '').trim(),
-      period : (d.period || '').trim(),
-      message: (d.message|| '').trim(),
+  saveAppointment(d) {
+    return APPOINT.insert.run({
+      name   : (d.name    || '').trim(),
+      email  : (d.email   || '').trim(),
+      phone  : (d.phone   || '').trim(),
+      date   : (d.date    || '').trim(),
+      period : (d.period  || '').trim(),
+      message: (d.message || '').trim(),
       ip     : d.ip || null
     });
   },
-  allAppointments ()    { return APPOINT.all.all(); },
+
+  allAppointments() {
+    return APPOINT.all.all();
+  },
+
+  deleteAppointment(id) {
+    return APPOINT.del.run(id);
+  },
 
   /* contacts */
-  saveContact (d) {
-    CONTACT.insert.run({
-      name   : (d.name   || '').trim(),
-      email  : (d.email  || '').trim(),
-      phone  : (d.phone  || '').trim(),
-      subject: (d.subject|| '').trim(),
-      message: (d.message|| '').trim(),
+  saveContact(d) {
+    return CONTACT.insert.run({
+      name   : (d.name    || '').trim(),
+      email  : (d.email   || '').trim(),
+      phone  : (d.phone   || '').trim(),
+      subject: (d.subject || '').trim(),
+      message: (d.message || '').trim(),
       ip     : d.ip || null
     });
   },
-  allContacts ()        { return CONTACT.all.all(); }
+
+  allContacts() {
+    return CONTACT.all.all();
+  }
 };
