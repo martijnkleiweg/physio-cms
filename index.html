@@ -37,7 +37,9 @@
     <div class="container">
       <h1 class="display-4">Fysiotherapie De Doelen</h1>
       <p class="lead">Persoonlijke fysiotherapie in het hart van Gouda – met een behandelplan op maat.</p>
-      <a href="/afspraak.html" class="btn btn-primary btn-lg">Maak een afspraak</a>
+      <!-- Tijdelijk verborgen wegens patiëntenstop
+<a href="/afspraak.html" class="btn btn-primary btn-lg">Maak een afspraak</a>
+-->
     </div>
   </section>
 
@@ -77,6 +79,65 @@
 
   <!-- ===== FOOTER / MISC ============================================= -->
   <div data-include="/partials/footer.html"></div>
+
+
+ 
+<!-- ===== TIJDELIJKE WACHTTIJDEN POPUP =============================== -->
+<div class="modal fade" id="wachttijdenModal"
+     tabindex="-1"
+     aria-labelledby="wachttijdenModalTitle"
+     aria-describedby="wachttijdenModalDescription"
+     aria-hidden="true">
+
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+
+      <div class="modal-header border-0 pb-0">
+        <h2 class="modal-title h4" id="wachttijdenModalTitle">
+          Langere wachttijden
+        </h2>
+        <button type="button" class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Sluiten"></button>
+      </div>
+
+      <div class="modal-body" id="wachttijdenModalDescription">
+        <p>
+          Door tijdelijke onderbezetting zijn de wachttijden
+          voor nieuwe patiënten momenteel langer dan gebruikelijk.
+        </p>
+
+        <div class="bg-light rounded p-3 mb-3">
+          <div class="d-flex justify-content-between gap-3 mb-2">
+            <span>Algemene fysiotherapie</span>
+            <strong class="text-nowrap">Circa 5 weken</strong>
+          </div>
+
+          <div class="d-flex justify-content-between gap-3">
+            <span>Kaakfysiotherapie</span>
+            <strong class="text-nowrap">Circa 8 weken</strong>
+          </div>
+        </div>
+
+        <p class="small mb-2">
+          Voor bestaande patiënten blijven gemaakte afspraken gelden.
+        </p>
+
+        <p class="small text-muted mb-0">
+          Wachttijden zijn indicatief en kunnen wijzigen.
+        </p>
+      </div>
+
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-primary"
+                data-bs-dismiss="modal">
+          Begrepen
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
 
   <!-- ===== JS (Bootstrap + partials loader FIRST) ===================== -->
   <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -202,5 +263,24 @@
 
     })();
   </script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modalElement = document.getElementById('wachttijdenModal');
+
+    if (
+      modalElement &&
+      window.bootstrap &&
+      !sessionStorage.getItem('wachttijdenModalGezien')
+    ) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+
+      modalElement.addEventListener('shown.bs.modal', () => {
+        sessionStorage.setItem('wachttijdenModalGezien', 'true');
+      }, { once: true });
+    }
+  });
+</script>
 </body>
 </html>
